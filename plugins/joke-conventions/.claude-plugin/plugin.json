@@ -1,0 +1,9 @@
+{
+  "name": "joke-conventions",
+  "description": "Joke's personal coding conventions",
+  "author": {
+    "name": "Joke de Buhr",
+    "email": "joke@xckk.de"
+  },
+  "repository": "https://github.com/joke/claude-plugins"
+}

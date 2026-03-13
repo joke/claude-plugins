@@ -1,0 +1,42 @@
+plugins {
+    id 'groovy'
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    annotationProcessor 'org.projectlombok:lombok:1.18.42'
+
+    compileOnly 'org.projectlombok:lombok:1.18.42'
+
+    implementation(platform('org.apache.groovy:groovy-bom:5.0.4'))
+    implementation(platform('org.spockframework:spock-bom:2.4-groovy-5.0'))
+
+    implementation("org.slf4j:slf4j-api:2.0.17")
+    testImplementation("org.slf4j:slf4j-simple:2.0.17")
+
+    implementation("org.apache.commons:commons-lang3:3.20.0")
+    implementation("org.apache.commons:commons-collections4:4.5.0")
+
+    testImplementation 'org.spockframework:spock-core'
+    testImplementation 'org.junit.platform:junit-platform-launcher'
+    testImplementation("org.mockito:mockito-junit-jupiter:5.22.0")
+    testImplementation "net.bytebuddy:byte-buddy:1.18.7"
+
+}
+
+sourceSets {
+    test {
+        groovy {
+            exclude '**/Reference__*.groovy'
+        }
+    }
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+    jvmArgs += ['-XX:+EnableDynamicAgentLoading', "-javaagent:${configurations.testRuntimeClasspath.find { it.name.contains('mockito-core') }.absolutePath}"]
+}
