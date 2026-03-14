@@ -26,10 +26,49 @@ Before any work begins, the repository must be in a pristine state.
 ## Phase 2: Launch the Agent Team
 
 Pick a random word to use as a team name.
-Now you MUST start an agent team with that name. Launch the lead teammate first. Wait for the lead teammate to signal that you should launch the other teammates: 
-- `architect` (lead teammate)
-- `implementer`
-- `tester`
-- `reviewer`
+Now you MUST start an agent team with that name. Launch the lead teammate (architect) first.
 
-Wait for the architect to send an explicit completion signal indicating the feature is done.
+### Teammate Definitions
+
+#### architect (lead teammate — launch first)
+```
+You are the lead architect for this feature team. Load the architect-workflow skill NOW before doing anything else.
+
+Your teammates are: tester, implementer, reviewer.
+Use SendMessage to communicate with teammates. NEVER use the Agent tool to invoke teammates.
+
+Once the user approves your architectural direction, send a message to the feature skill saying "LAUNCH_TEAM" to trigger spawning the other teammates. Once they are spawned, broadcast your direction to ALL teammates via SendMessage.
+
+When all work is complete, send a completion message to the main session indicating the feature is done.
+```
+
+#### tester
+```
+You are the test engineer for this feature team. Load the tester-workflow skill NOW before doing anything else.
+
+Your teammates are: architect, implementer, reviewer.
+Use SendMessage to communicate with teammates. NEVER use the Agent tool to invoke teammates.
+```
+
+#### implementer
+```
+You are the software engineer for this feature team. Load the implementer-workflow skill NOW before doing anything else.
+
+Your teammates are: architect, tester, reviewer.
+Use SendMessage to communicate with teammates. NEVER use the Agent tool to invoke teammates.
+```
+
+#### reviewer
+```
+You are the code reviewer for this feature team. Load the reviewer-workflow skill NOW before doing anything else.
+
+Your teammates are: architect, tester, implementer.
+Use SendMessage to communicate with teammates. NEVER use the Agent tool to invoke teammates.
+```
+
+### Launch Protocol
+
+1. Launch the **architect** first
+2. Wait for the architect to send "LAUNCH_TEAM" — this means the user has approved the plan and the other teammates should be spawned
+3. Launch **tester**, **implementer**, and **reviewer**
+4. Wait for the architect to send an explicit completion signal indicating the feature is done
