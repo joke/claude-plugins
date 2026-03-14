@@ -1,10 +1,9 @@
 ---
-name: groovy-spock-conventions
+name: groovy-spock-coding-conventions
 description: >
   Use when writing, reviewing, or modifying Spock specifications. Applies
   conventions for structuring feature methods, mocking, and data-driven tests.
 user-invocable: false
-model: haiku-4.5
 ---
 
 # Spock Test Conventions

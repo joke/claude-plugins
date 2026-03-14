@@ -1,6 +1,6 @@
 # Spock Test Coverage - Training Classes
 
-This document describes the comprehensive set of Java classes created to validate the groovy-spock-conventions skill. Each class exposes different testing patterns and scenarios that should be covered by Spock tests.
+This document describes the comprehensive set of Java classes created to validate the groovy-spock-coding-conventions skill. Each class exposes different testing patterns and scenarios that should be covered by Spock tests.
 
 ## Order Management System
 

@@ -1,8 +1,9 @@
 {
-  "name": "joke-workflows",
+  "name": "workflows",
   "description": "Joke's personal workflows",
   "author": {
     "name": "Joke de Buhr",
     "email": "joke@xckk.de"
-  },  "repository": "https://github.com/joke/claude-plugins"
+  },
+  "repository": "https://github.com/joke/claude-plugins"
 }

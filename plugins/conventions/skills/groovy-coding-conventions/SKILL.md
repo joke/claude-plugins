@@ -1,5 +1,5 @@
 ---
-name: groovy-code-conventions
+name: groovy-coding-conventions
 description: >
   Use when writing, reviewing, or modifying Groovy code. Applies general programming
   principles and design conventions. Does not cover formatting or indentation.

@@ -1,5 +1,5 @@
 ---
-name: java-code-conventions
+name: java-coding-conventions
 description: >
   Use when writing, reviewing, or modifying Java code. Applies general programming
   principles and design conventions. Does not cover formatting or indentation.

@@ -1,18 +1,18 @@
 {
-  "name": "joke-plugins",
+  "name": "plugins",
   "owner": {
     "name": "Joke de Buhr",
     "email": "joke@xckk.de"
   },
   "plugins": [
     {
-      "name": "joke-conventions",
-      "source": "./plugins/joke-conventions",
+      "name": "conventions",
+      "source": "./plugins/conventions",
       "description": "Joke's personal coding conventions"
     },
     {
-      "name": "joke-workflows",
-      "source": "./plugins/joke-workflows",
+      "name": "workflows",
+      "source": "./plugins/workflows",
       "description": "Joke's personal workflows"
     }
   ]
