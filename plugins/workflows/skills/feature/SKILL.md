@@ -4,7 +4,7 @@ description: >
   Orchestrates feature development from start to finish.
 user-invocable: true
 disable-model-invocation: true
-model: haiku
+model: sonnet
 allowed-tools: TeamCreate, SendMessage
 ---
 
