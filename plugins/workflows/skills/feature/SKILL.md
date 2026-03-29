@@ -5,10 +5,10 @@ description: >
 user-invocable: true
 disable-model-invocation: true
 model: sonnet
-allowed-tools: TeamCreate, SendMessage
+allowed-tools: TeamCreate, SendMessage, AskUserQuestion
 ---
 
-You MUST ALWAYS fetch the tool schemas for: TeamCreate, SendMessage
+You MUST ALWAYS fetch the tool schemas for: TeamCreate, SendMessage, AskUserQuestion
 
 These are the phases of feature development. You MUST follow them precisely and do not deviate!
 
@@ -18,9 +18,19 @@ Before any work begins, the repository must be in a pristine state.
 
 1. Run `git status` to check for modified, staged, or untracked files
 2. If the repository is **clean** (no modifications, no staged changes, no untracked files): proceed to Phase 2
-3. If the repository is **dirty**: stop and inform the user. Ask them how they want to proceed:
-   - **Option A — You handle it**: Run `git stash` to safely preserve their changes, then re-check `git status` to confirm the repository is clean
-   - **Option B — User handles it**: Wait for the user to clean up manually, then re-run `git status` to verify
+3. If the repository is **dirty**: use AskUserQuestion to prompt the user:
+   ```
+   question: "The repository has uncommitted changes. How would you like to proceed?"
+   header: "Dirty repo"
+   multiSelect: false
+   options:
+     - label: "Stash changes (Recommended)"
+       description: "Run git stash --include-untracked to safely preserve all changes"
+     - label: "I'll handle it myself"
+       description: "I'll clean up manually, then check again"
+   ```
+   - If user selects **Stash changes**: Run `git stash --include-untracked`, then re-check `git status` to confirm the repository is clean
+   - If user selects **I'll handle it myself**: re-run `git status` to verify. If still dirty, ask again.
 4. Do NOT proceed to Phase 2 until `git status` confirms a pristine working tree
 
 ## Phase 2: Launch the Agent Team

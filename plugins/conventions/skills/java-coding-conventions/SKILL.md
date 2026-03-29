@@ -38,8 +38,8 @@ user-invocable: false
 
 ## Methods
 
-- Each method does exactly one thing. If you can't describe it simply, extract.
-- Method names describe what the method does.
+- **CRITICAL**: Each method MUST do exactly one thing. If you can't describe it simply → refactor.
+- **CRITICAL**: Method names MUST describe what the method does.
 - Small and focused. Extract named methods over inline logic.
 - Prefer streams over loops for collection processing.
 
