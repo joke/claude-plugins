@@ -1,0 +1,9 @@
+{
+  "name": "training",
+  "description": "Joke's personal skill training",
+  "author": {
+    "name": "Joke de Buhr",
+    "email": "joke@xckk.de"
+  },
+  "repository": "https://github.com/joke/claude-plugins"
+}
