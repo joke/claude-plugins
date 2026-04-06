@@ -1,0 +1,154 @@
+{
+  "metadata": {
+    "skill_name": "java8-coding-conventions",
+    "skill_path": "plugins/conventions/skills/java8-coding-conventions",
+    "timestamp": "2026-04-05T19:13:47Z",
+    "evals_run": ["refactor-order-service", "refactor-user-profile", "greenfield-inventory-service"],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "config": "with_skill",
+      "eval_id": 1,
+      "eval_name": "refactor-order-service",
+      "pass_rate": 1.0,
+      "passed": 7,
+      "failed": 0,
+      "total": 7,
+      "time_seconds": 34.9,
+      "tokens": 15837,
+      "expectations": [
+        {"text": "All local variables and parameters use final keyword", "passed": true, "evidence": "All variables and parameters use final"},
+        {"text": "No checked exceptions in method signatures", "passed": true, "evidence": "No checked exceptions in signatures"},
+        {"text": "No for/while loops — all collection processing uses streams", "passed": true, "evidence": "No for/while loops found"},
+        {"text": "Methods that may not find a result return Optional instead of null", "passed": true, "evidence": "Find/lookup methods return Optional"},
+        {"text": "All fields are private final", "passed": true, "evidence": "All fields are private final"},
+        {"text": "No method exceeds ~15 lines of logic", "passed": true, "evidence": "All methods are reasonably small"},
+        {"text": "No Java 9+ features used", "passed": true, "evidence": "No Java 9+ features"}
+      ]
+    },
+    {
+      "config": "without_skill",
+      "eval_id": 1,
+      "eval_name": "refactor-order-service",
+      "pass_rate": 0.857,
+      "passed": 6,
+      "failed": 1,
+      "total": 7,
+      "time_seconds": 29.5,
+      "tokens": 12458,
+      "expectations": [
+        {"text": "All local variables and parameters use final keyword", "passed": false, "evidence": "Parameter not final: 'OrderRepository orderRepository'"},
+        {"text": "No checked exceptions in method signatures", "passed": true, "evidence": "No checked exceptions in signatures"},
+        {"text": "No for/while loops — all collection processing uses streams", "passed": true, "evidence": "No for/while loops found"},
+        {"text": "Methods that may not find a result return Optional instead of null", "passed": true, "evidence": "Find/lookup methods return Optional"},
+        {"text": "All fields are private final", "passed": true, "evidence": "All fields are private final"},
+        {"text": "No method exceeds ~15 lines of logic", "passed": true, "evidence": "All methods are reasonably small"},
+        {"text": "No Java 9+ features used", "passed": true, "evidence": "No Java 9+ features"}
+      ]
+    },
+    {
+      "config": "with_skill",
+      "eval_id": 2,
+      "eval_name": "refactor-user-profile",
+      "pass_rate": 1.0,
+      "passed": 7,
+      "failed": 0,
+      "total": 7,
+      "time_seconds": 27.3,
+      "tokens": 14725,
+      "expectations": [
+        {"text": "All local variables and parameters use final keyword", "passed": true, "evidence": "All variables and parameters use final"},
+        {"text": "No setter methods exist", "passed": true, "evidence": "No setter methods"},
+        {"text": "All fields are private final", "passed": true, "evidence": "All fields are private final"},
+        {"text": "Single constructor that accepts and sets all fields", "passed": true, "evidence": "Constructor accepts all fields"},
+        {"text": "Collection getters return unmodifiable views", "passed": true, "evidence": "Uses unmodifiable collections"},
+        {"text": "No for/while loops", "passed": true, "evidence": "No for/while loops found"},
+        {"text": "No Java 9+ features used", "passed": true, "evidence": "No Java 9+ features"}
+      ]
+    },
+    {
+      "config": "without_skill",
+      "eval_id": 2,
+      "eval_name": "refactor-user-profile",
+      "pass_rate": 0.714,
+      "passed": 5,
+      "failed": 2,
+      "total": 7,
+      "time_seconds": 25.6,
+      "tokens": 12003,
+      "expectations": [
+        {"text": "All local variables and parameters use final keyword", "passed": false, "evidence": "Parameter not final: 'Builder builder'"},
+        {"text": "No setter methods exist", "passed": true, "evidence": "No setter methods"},
+        {"text": "All fields are private final", "passed": true, "evidence": "All fields are private final"},
+        {"text": "Single constructor that accepts and sets all fields", "passed": false, "evidence": "Uses Builder pattern instead of direct constructor"},
+        {"text": "Collection getters return unmodifiable views", "passed": true, "evidence": "Uses unmodifiable collections"},
+        {"text": "No for/while loops", "passed": true, "evidence": "No for/while loops found"},
+        {"text": "No Java 9+ features used", "passed": true, "evidence": "No Java 9+ features"}
+      ]
+    },
+    {
+      "config": "with_skill",
+      "eval_id": 3,
+      "eval_name": "greenfield-inventory-service",
+      "pass_rate": 1.0,
+      "passed": 7,
+      "failed": 0,
+      "total": 7,
+      "time_seconds": 33.0,
+      "tokens": 14738,
+      "expectations": [
+        {"text": "All local variables and parameters use final keyword", "passed": true, "evidence": "All variables and parameters use final"},
+        {"text": "All fields on InventoryService are private final", "passed": true, "evidence": "All fields are private final"},
+        {"text": "Dependencies injected via constructor", "passed": true, "evidence": "Constructor injection used"},
+        {"text": "No for/while loops — all collection processing uses streams", "passed": true, "evidence": "No for/while loops found"},
+        {"text": "Find methods return Optional", "passed": true, "evidence": "Find/lookup methods return Optional"},
+        {"text": "Each method does one thing", "passed": true, "evidence": "All methods are reasonably small"},
+        {"text": "No Java 9+ features used", "passed": true, "evidence": "No Java 9+ features"}
+      ]
+    },
+    {
+      "config": "without_skill",
+      "eval_id": 3,
+      "eval_name": "greenfield-inventory-service",
+      "pass_rate": 0.857,
+      "passed": 6,
+      "failed": 1,
+      "total": 7,
+      "time_seconds": 24.7,
+      "tokens": 11658,
+      "expectations": [
+        {"text": "All local variables and parameters use final keyword", "passed": false, "evidence": "Parameter not final: 'ProductRepository productRepository'"},
+        {"text": "All fields on InventoryService are private final", "passed": true, "evidence": "All fields are private final"},
+        {"text": "Dependencies injected via constructor", "passed": true, "evidence": "Constructor injection used"},
+        {"text": "No for/while loops — all collection processing uses streams", "passed": true, "evidence": "No for/while loops found"},
+        {"text": "Find methods return Optional", "passed": true, "evidence": "Find/lookup methods return Optional"},
+        {"text": "Each method does one thing", "passed": true, "evidence": "All methods are reasonably small"},
+        {"text": "No Java 9+ features used", "passed": true, "evidence": "No Java 9+ features"}
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {"mean": 1.0, "stddev": 0.0},
+      "time_seconds": {"mean": 31.7, "stddev": 4.0},
+      "tokens": {"mean": 15100, "stddev": 609}
+    },
+    "without_skill": {
+      "pass_rate": {"mean": 0.809, "stddev": 0.083},
+      "time_seconds": {"mean": 26.6, "stddev": 2.6},
+      "tokens": {"mean": 12040, "stddev": 400}
+    },
+    "delta": {
+      "pass_rate": "+0.191",
+      "time_seconds": "+5.1",
+      "tokens": "+3060"
+    }
+  },
+  "notes": [
+    "The 'all-vars-final' assertion is the key discriminator — baseline never uses final on parameters, skill always does.",
+    "Baseline for eval-2 used a Builder pattern instead of a direct constructor, which is a valid Java pattern but not the convention specified.",
+    "Most other assertions (streams, Optional, immutable fields, no Java 9+) pass for both with and without skill — these are well-known Java 8 best practices that models already follow.",
+    "Skill runs use ~25% more tokens and ~19% more time, which is the cost of reading the skill file."
+  ]
+}

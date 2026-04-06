@@ -1,0 +1,42 @@
+{
+  "eval_id": 1,
+  "eval_name": "refactor-order-service",
+  "variant": "with_skill",
+  "expectations": [
+    {
+      "text": "All local variables and parameters use final keyword",
+      "passed": true,
+      "evidence": "All variables and parameters use final"
+    },
+    {
+      "text": "No checked exceptions in method signatures (no throws clause with checked types)",
+      "passed": true,
+      "evidence": "No checked exceptions in signatures"
+    },
+    {
+      "text": "No for/while loops \u2014 all collection processing uses streams",
+      "passed": true,
+      "evidence": "No for/while loops found"
+    },
+    {
+      "text": "Methods that may not find a result return Optional instead of null",
+      "passed": true,
+      "evidence": "Find/lookup methods return Optional"
+    },
+    {
+      "text": "All fields are private final",
+      "passed": true,
+      "evidence": "All fields are private final"
+    },
+    {
+      "text": "No method exceeds ~15 lines of logic; long methods are split into focused helpers",
+      "passed": true,
+      "evidence": "All methods are reasonably small"
+    },
+    {
+      "text": "No Java 9+ features (no List.of, var, records, sealed classes, Stream.toList())",
+      "passed": true,
+      "evidence": "No Java 9+ features"
+    }
+  ]
+}

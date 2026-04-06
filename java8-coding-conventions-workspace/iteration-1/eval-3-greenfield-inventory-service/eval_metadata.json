@@ -1,0 +1,14 @@
+{
+  "eval_id": 3,
+  "eval_name": "greenfield-inventory-service",
+  "prompt": "Write a Java 8 InventoryService class from scratch.",
+  "assertions": [
+    {"id": "all-vars-final", "text": "All local variables and parameters use final keyword"},
+    {"id": "immutable-fields", "text": "All fields on InventoryService are private final"},
+    {"id": "constructor-injection", "text": "Dependencies injected via constructor, no field/setter injection"},
+    {"id": "streams-everywhere", "text": "No for/while loops — all collection processing uses streams"},
+    {"id": "optional-for-find", "text": "Find methods (most expensive product) return Optional"},
+    {"id": "small-methods", "text": "Each method does one thing; no method exceeds ~15 lines"},
+    {"id": "no-java9-features", "text": "No Java 9+ features (no List.of, var, records, sealed classes, Stream.toList())"}
+  ]
+}

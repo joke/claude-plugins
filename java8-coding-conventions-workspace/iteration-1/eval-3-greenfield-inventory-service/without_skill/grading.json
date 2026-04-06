@@ -1,0 +1,42 @@
+{
+  "eval_id": 3,
+  "eval_name": "greenfield-inventory-service",
+  "variant": "without_skill",
+  "expectations": [
+    {
+      "text": "All local variables and parameters use final keyword",
+      "passed": false,
+      "evidence": "Parameter not final: 'ProductRepository productRepository'"
+    },
+    {
+      "text": "All fields on InventoryService are private final",
+      "passed": true,
+      "evidence": "All fields are private final"
+    },
+    {
+      "text": "Dependencies injected via constructor, no field/setter injection",
+      "passed": true,
+      "evidence": "Constructor injection used"
+    },
+    {
+      "text": "No for/while loops \u2014 all collection processing uses streams",
+      "passed": true,
+      "evidence": "No for/while loops found"
+    },
+    {
+      "text": "Find methods (most expensive product) return Optional",
+      "passed": true,
+      "evidence": "Find/lookup methods return Optional"
+    },
+    {
+      "text": "Each method does one thing; no method exceeds ~15 lines",
+      "passed": true,
+      "evidence": "All methods are reasonably small"
+    },
+    {
+      "text": "No Java 9+ features (no List.of, var, records, sealed classes, Stream.toList())",
+      "passed": true,
+      "evidence": "No Java 9+ features"
+    }
+  ]
+}
