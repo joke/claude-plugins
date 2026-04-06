@@ -1,0 +1,35 @@
+{
+  "eval_id": 2,
+  "eval_name": "eval-2-user-profile",
+  "prompt": "Refactor UserProfile.java to follow our Java 8 conventions. It's a mutable JavaBean with getters/setters and imperative collection code.",
+  "assertions": [
+    {
+      "id": "all-vars-final",
+      "text": "All local variables and parameters use final keyword"
+    },
+    {
+      "id": "no-setters",
+      "text": "No setter methods exist"
+    },
+    {
+      "id": "immutable-fields",
+      "text": "All fields are private final"
+    },
+    {
+      "id": "constructor-sets-all",
+      "text": "Single constructor that accepts and sets all fields"
+    },
+    {
+      "id": "unmodifiable-collections",
+      "text": "Collection getters return unmodifiable views"
+    },
+    {
+      "id": "streams-over-loops",
+      "text": "No for/while loops"
+    },
+    {
+      "id": "no-java9-features",
+      "text": "No Java 9+ features used"
+    }
+  ]
+}

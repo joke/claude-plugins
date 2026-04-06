@@ -1,0 +1,42 @@
+{
+  "eval_id": 3,
+  "eval_name": "eval-3-inventory-service",
+  "variant": "without_skill",
+  "expectations": [
+    {
+      "text": "All local variables and parameters use final keyword",
+      "passed": true,
+      "evidence": "All variables and parameters use final"
+    },
+    {
+      "text": "All fields on InventoryService are private final",
+      "passed": true,
+      "evidence": "All fields are private final"
+    },
+    {
+      "text": "Dependencies injected via constructor",
+      "passed": true,
+      "evidence": "Constructor injection used"
+    },
+    {
+      "text": "No for/while loops",
+      "passed": true,
+      "evidence": "No for/while loops found"
+    },
+    {
+      "text": "Find methods return Optional",
+      "passed": true,
+      "evidence": "Find/lookup methods return Optional"
+    },
+    {
+      "text": "Each method does one thing",
+      "passed": true,
+      "evidence": "All methods are reasonably small"
+    },
+    {
+      "text": "No Java 9+ features used",
+      "passed": true,
+      "evidence": "No Java 9+ features"
+    }
+  ]
+}

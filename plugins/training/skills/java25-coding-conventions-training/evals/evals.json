@@ -1,0 +1,53 @@
+{
+  "skill_name": "java25-coding-conventions",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Refactor ShapeCalculator.java to follow our Java 25 coding conventions. The class uses old-style instanceof with casts, abstract class hierarchy instead of sealed types and records, manual string building, and Collections.unmodifiableList instead of modern collection factories.",
+      "expected_output": "Refactored with: sealed interface Shape, record subtypes (Circle, Rectangle, Triangle), switch expression with pattern matching for area/describe, streams for filtering, List.of/List.copyOf, all variables final",
+      "files": ["evals/files/ShapeCalculator.java"],
+      "assertions": [
+        {"id": "all-vars-final-or-var", "text": "All local variables and parameters use final or final var"},
+        {"id": "uses-records", "text": "Shape subtypes are records"},
+        {"id": "uses-sealed", "text": "Shape hierarchy uses sealed interface"},
+        {"id": "uses-pattern-matching", "text": "Uses pattern matching instead of instanceof + cast"},
+        {"id": "uses-switch-expressions", "text": "Uses switch expressions with arrow syntax"},
+        {"id": "modern-collections", "text": "Uses List.of/List.copyOf instead of Collections.unmodifiable*"},
+        {"id": "no-java8-patterns", "text": "No outdated Java 8 patterns (Collections.unmodifiable*, Collectors.toList)"},
+        {"id": "streams-over-loops", "text": "No for/while loops"},
+        {"id": "immutable-fields", "text": "All fields are private final"}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Refactor ApiResponse.java to follow our Java 25 conventions. It's a manually-written immutable class that should be a record, uses old-style string concatenation instead of text blocks, old-style Collections.unmodifiable* instead of List.copyOf, and an if-else chain for status categories instead of a switch expression.",
+      "expected_output": "Record-based ApiResponse with: compact constructor for validation, List.copyOf for errors, text block for JSON template, switch expression for status category, final var where appropriate",
+      "files": ["evals/files/ApiResponse.java"],
+      "assertions": [
+        {"id": "all-vars-final-or-var", "text": "All local variables and parameters use final or final var"},
+        {"id": "uses-records", "text": "ApiResponse is a record"},
+        {"id": "uses-switch-expressions", "text": "Status category uses switch expression"},
+        {"id": "modern-collections", "text": "Uses List.copyOf instead of Collections.unmodifiable*"},
+        {"id": "no-java8-patterns", "text": "No outdated Java 8 patterns"},
+        {"id": "small-methods", "text": "No method exceeds ~20 lines of logic"}
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Write a Java 25 event processing system. Create a sealed interface Event with record subtypes: UserCreated(String userId, String email), OrderPlaced(String orderId, String userId, List<String> items), and PaymentProcessed(String paymentId, double amount, boolean successful). Then write an EventProcessor class with a method that processes events using pattern matching and returns a summary string. Include a method that groups events by type.",
+      "expected_output": "Sealed Event interface with record subtypes, EventProcessor using switch pattern matching, streams for grouping, List.of/List.copyOf, final var, text blocks for multi-line output",
+      "files": [],
+      "assertions": [
+        {"id": "all-vars-final-or-var", "text": "All local variables and parameters use final or final var"},
+        {"id": "uses-records", "text": "Event subtypes are records"},
+        {"id": "uses-sealed", "text": "Event hierarchy uses sealed interface"},
+        {"id": "uses-pattern-matching", "text": "Event processing uses pattern matching"},
+        {"id": "uses-switch-expressions", "text": "Uses switch expressions for event dispatch"},
+        {"id": "modern-collections", "text": "Uses modern collection factories"},
+        {"id": "streams-over-loops", "text": "No for/while loops"},
+        {"id": "small-methods", "text": "Each method does one thing"},
+        {"id": "constructor-injection", "text": "EventProcessor dependencies via constructor"}
+      ]
+    }
+  ]
+}

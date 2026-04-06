@@ -14,48 +14,51 @@ This skill regenerates the `java8-coding-conventions` skill from reference mater
 
 ## What it produces
 
-A SKILL.md at `plugins/conventions/skills/java8-coding-conventions/SKILL.md` that teaches Claude to write and review Java 8 code following functional, immutable conventions.
+A SKILL.md at `plugins/conventions/skills/java8-coding-conventions/SKILL.md` that teaches Claude to write and review Java 8 code. This skill layers Java 8-specific conventions on top of the general `java-coding-conventions` skill.
 
 ## Step 1: Regenerate the skill
 
-Read `references/conventions.md` for the full set of conventions. Then write the output skill:
+Read `references/conventions.md` for the Java 8-specific conventions. Then write the output skill:
 
 1. **Output path:** `plugins/conventions/skills/java8-coding-conventions/SKILL.md`
 2. **Frontmatter:** name `java8-coding-conventions`, `user-invocable: false`, `model: haiku-4.5`
-3. **Scope:** Java 8 only. No features from Java 9+ (`var`, records, sealed classes, `List.of`, `Map.of`, modules, text blocks).
+3. **Scope:** Java 8 only. No features from Java 9+. The skill must reference `plugins/conventions/skills/java-coding-conventions/SKILL.md` for general conventions and only add Java 8-specific guidance.
 4. **Tone:** Explain *why* each convention matters, not just what to do. Use before/after examples. Imperative form.
 5. **Length:** Under 500 lines. Dense and practical — no filler.
-6. **Structure:** Group by theme: variables/parameters, immutability, functional style & streams, Optional, small methods, functional interfaces, exceptions, design, java.time, imports, naming.
+6. **Structure:** Start with inclusion of general skill, then: version boundary, immutable collections (Java 8 style), streams over loops, Optional, functional interfaces, java.time.
 
 Key things the skill must make very clear (these are the conventions models don't follow without explicit instruction):
-- **Every** variable and parameter is `final` — this is the single most important convention
-- Direct constructor with all fields, not Builder pattern
 - `Collections.unmodifiableList(new ArrayList<>(input))` for defensive copy + unmodifiable (not `List.of`)
 - Extract complex predicates/mappers into named private methods rather than multi-line inline lambdas
 - Method references (`Customer::isActive`) over lambdas (`c -> c.isActive()`) when the lambda just delegates
+- `Collectors.toList()` not `Stream.toList()`
+- No Java 9+ features
 
 ## Step 2: Validate with test cases
 
 After regenerating, validate the skill using the test cases in `evals/evals.json`.
 
 For each test case, spawn a subagent that:
-1. Reads the generated skill from `plugins/conventions/skills/java8-coding-conventions/SKILL.md`
-2. Reads any input files specified in the test case
-3. Completes the task described in the prompt, following the skill's conventions
-4. Writes output Java files to a workspace directory
+1. Reads the general skill from `plugins/conventions/skills/java-coding-conventions/SKILL.md`
+2. Reads the generated Java 8 skill from `plugins/conventions/skills/java8-coding-conventions/SKILL.md`
+3. Reads any input files specified in the test case
+4. Completes the task described in the prompt, following both skills' conventions
+5. Writes output Java files to a workspace directory
 
-Then run the grading script `scripts/grade.py` against the outputs. The script checks:
-- All variables and parameters use `final`
-- No checked exceptions
+Then run the shared grading script against the outputs:
+
+```bash
+cd plugins/training
+python -m shared.grade <workspace-dir>
+```
+
+The script checks Java 8-specific assertions:
 - Streams over loops (no for/while)
 - Optional for find methods
-- Immutable fields (`private final`)
-- Small methods (under ~15 lines)
 - No Java 9+ features
-- No setters
-- Constructor sets all fields
-- Unmodifiable collection returns
-- Constructor injection
+- Unmodifiable collections (Java 8 style)
+
+Plus general assertions (final vars, immutable fields, small methods, etc.) to verify the general skill inclusion works correctly.
 
 ### Expected results
 
@@ -72,4 +75,4 @@ Input files for refactoring tests are in `evals/files/`.
 
 ## Conventions reference
 
-The authoritative conventions are in `references/conventions.md`. Always read that file when regenerating — it is the single source of truth for what rules to include.
+The authoritative conventions are in `references/conventions.md`. Always read that file when regenerating — it is the single source of truth for what Java 8-specific rules to include.

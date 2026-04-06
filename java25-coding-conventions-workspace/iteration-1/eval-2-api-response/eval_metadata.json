@@ -1,0 +1,31 @@
+{
+  "eval_id": 2,
+  "eval_name": "eval-2-api-response",
+  "prompt": "Refactor ApiResponse.java to follow our Java 25 conventions. It's a manually-written immutable class that should be a record, uses old-style string concatenation instead of text blocks, old-style Collections.unmodifiable* instead of List.copyOf, and an if-else chain for status categories instead of a switch expression.",
+  "assertions": [
+    {
+      "id": "all-vars-final-or-var",
+      "text": "All local variables and parameters use final or final var"
+    },
+    {
+      "id": "uses-records",
+      "text": "ApiResponse is a record"
+    },
+    {
+      "id": "uses-switch-expressions",
+      "text": "Status category uses switch expression"
+    },
+    {
+      "id": "modern-collections",
+      "text": "Uses List.copyOf instead of Collections.unmodifiable*"
+    },
+    {
+      "id": "no-java8-patterns",
+      "text": "No outdated Java 8 patterns"
+    },
+    {
+      "id": "small-methods",
+      "text": "No method exceeds ~20 lines of logic"
+    }
+  ]
+}

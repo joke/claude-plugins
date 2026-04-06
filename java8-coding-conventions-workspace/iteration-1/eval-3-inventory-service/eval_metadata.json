@@ -1,0 +1,35 @@
+{
+  "eval_id": 3,
+  "eval_name": "eval-3-inventory-service",
+  "prompt": "Write a Java 8 service class called InventoryService that manages a product inventory. It should support: finding products by category, calculating total stock value, finding the most expensive product, and getting a summary of stock levels grouped by category. Use a ProductRepository dependency for data access.",
+  "assertions": [
+    {
+      "id": "all-vars-final",
+      "text": "All local variables and parameters use final keyword"
+    },
+    {
+      "id": "immutable-fields",
+      "text": "All fields on InventoryService are private final"
+    },
+    {
+      "id": "constructor-injection",
+      "text": "Dependencies injected via constructor"
+    },
+    {
+      "id": "streams-everywhere",
+      "text": "No for/while loops"
+    },
+    {
+      "id": "optional-for-find",
+      "text": "Find methods return Optional"
+    },
+    {
+      "id": "small-methods",
+      "text": "Each method does one thing"
+    },
+    {
+      "id": "no-java9-features",
+      "text": "No Java 9+ features used"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "eval_id": 3,
+  "eval_name": "eval-3-task-scheduler",
+  "variant": "with_skill",
+  "expectations": [
+    {
+      "text": "All local variables and parameters use final keyword",
+      "passed": true,
+      "evidence": "All variables and parameters use final"
+    },
+    {
+      "text": "All fields on TaskScheduler are private final",
+      "passed": true,
+      "evidence": "All fields are private final"
+    },
+    {
+      "text": "Dependencies injected via constructor",
+      "passed": true,
+      "evidence": "Constructor injection used"
+    },
+    {
+      "text": "No setter methods",
+      "passed": true,
+      "evidence": "No setter methods"
+    },
+    {
+      "text": "Each method does one thing",
+      "passed": true,
+      "evidence": "All methods are reasonably small"
+    },
+    {
+      "text": "No checked exceptions in method signatures",
+      "passed": true,
+      "evidence": "No checked exceptions in signatures"
+    }
+  ]
+}

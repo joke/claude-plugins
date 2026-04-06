@@ -1,0 +1,43 @@
+{
+  "eval_id": 3,
+  "eval_name": "eval-3-event-processing",
+  "prompt": "Write a Java 25 event processing system. Create a sealed interface Event with record subtypes: UserCreated(String userId, String email), OrderPlaced(String orderId, String userId, List<String> items), and PaymentProcessed(String paymentId, double amount, boolean successful). Then write an EventProcessor class with a method that processes events using pattern matching and returns a summary string. Include a method that groups events by type.",
+  "assertions": [
+    {
+      "id": "all-vars-final-or-var",
+      "text": "All local variables and parameters use final or final var"
+    },
+    {
+      "id": "uses-records",
+      "text": "Event subtypes are records"
+    },
+    {
+      "id": "uses-sealed",
+      "text": "Event hierarchy uses sealed interface"
+    },
+    {
+      "id": "uses-pattern-matching",
+      "text": "Event processing uses pattern matching"
+    },
+    {
+      "id": "uses-switch-expressions",
+      "text": "Uses switch expressions for event dispatch"
+    },
+    {
+      "id": "modern-collections",
+      "text": "Uses modern collection factories"
+    },
+    {
+      "id": "streams-over-loops",
+      "text": "No for/while loops"
+    },
+    {
+      "id": "small-methods",
+      "text": "Each method does one thing"
+    },
+    {
+      "id": "constructor-injection",
+      "text": "EventProcessor dependencies via constructor"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "eval_id": 2,
+  "eval_name": "eval-2-notification-config",
+  "prompt": "Refactor NotificationConfig.java to follow our Java conventions. It's a mutable JavaBean with getters/setters, exposed mutable collections, and no defensive copying. Make it immutable with a proper constructor.",
+  "assertions": [
+    {
+      "id": "all-vars-final",
+      "text": "All local variables and parameters use final keyword"
+    },
+    {
+      "id": "no-setters",
+      "text": "No setter methods exist"
+    },
+    {
+      "id": "immutable-fields",
+      "text": "All fields are private final"
+    },
+    {
+      "id": "constructor-sets-all",
+      "text": "Single constructor that accepts and sets all fields"
+    },
+    {
+      "id": "small-methods",
+      "text": "No method exceeds ~20 lines of logic"
+    }
+  ]
+}

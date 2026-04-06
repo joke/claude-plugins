@@ -1,0 +1,32 @@
+{
+  "eval_id": 2,
+  "eval_name": "eval-2-notification-config",
+  "variant": "with_skill",
+  "expectations": [
+    {
+      "text": "All local variables and parameters use final keyword",
+      "passed": true,
+      "evidence": "All variables and parameters use final"
+    },
+    {
+      "text": "No setter methods exist",
+      "passed": true,
+      "evidence": "No setter methods"
+    },
+    {
+      "text": "All fields are private final",
+      "passed": true,
+      "evidence": "All fields are private final"
+    },
+    {
+      "text": "Single constructor that accepts and sets all fields",
+      "passed": true,
+      "evidence": "Constructor accepts all fields"
+    },
+    {
+      "text": "No method exceeds ~20 lines of logic",
+      "passed": true,
+      "evidence": "All methods are reasonably small"
+    }
+  ]
+}

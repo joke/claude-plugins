@@ -1,0 +1,52 @@
+{
+  "eval_id": 3,
+  "eval_name": "eval-3-event-processing",
+  "variant": "with_skill",
+  "expectations": [
+    {
+      "text": "All local variables and parameters use final or final var",
+      "passed": true,
+      "evidence": "All variables and parameters use final"
+    },
+    {
+      "text": "Event subtypes are records",
+      "passed": true,
+      "evidence": "Uses record types"
+    },
+    {
+      "text": "Event hierarchy uses sealed interface",
+      "passed": true,
+      "evidence": "Uses sealed types"
+    },
+    {
+      "text": "Event processing uses pattern matching",
+      "passed": true,
+      "evidence": "No instanceof checks present"
+    },
+    {
+      "text": "Uses switch expressions for event dispatch",
+      "passed": true,
+      "evidence": "Uses switch expressions with arrow syntax"
+    },
+    {
+      "text": "Uses modern collection factories",
+      "passed": true,
+      "evidence": "Uses modern collection factories"
+    },
+    {
+      "text": "No for/while loops",
+      "passed": true,
+      "evidence": "No for/while loops found"
+    },
+    {
+      "text": "Each method does one thing",
+      "passed": true,
+      "evidence": "All methods are reasonably small"
+    },
+    {
+      "text": "EventProcessor dependencies via constructor",
+      "passed": true,
+      "evidence": "Record uses constructor injection implicitly"
+    }
+  ]
+}

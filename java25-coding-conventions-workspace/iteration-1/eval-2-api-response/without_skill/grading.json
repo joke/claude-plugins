@@ -1,0 +1,37 @@
+{
+  "eval_id": 2,
+  "eval_name": "eval-2-api-response",
+  "variant": "without_skill",
+  "expectations": [
+    {
+      "text": "All local variables and parameters use final or final var",
+      "passed": false,
+      "evidence": "Parameter not final: 'int statusCode'"
+    },
+    {
+      "text": "ApiResponse is a record",
+      "passed": true,
+      "evidence": "Uses record types"
+    },
+    {
+      "text": "Status category uses switch expression",
+      "passed": true,
+      "evidence": "Uses switch expressions with arrow syntax"
+    },
+    {
+      "text": "Uses List.copyOf instead of Collections.unmodifiable*",
+      "passed": true,
+      "evidence": "Uses modern collection factories"
+    },
+    {
+      "text": "No outdated Java 8 patterns",
+      "passed": true,
+      "evidence": "No outdated Java 8 patterns"
+    },
+    {
+      "text": "No method exceeds ~20 lines of logic",
+      "passed": false,
+      "evidence": "Long method (~22 lines) starting at line 23"
+    }
+  ]
+}

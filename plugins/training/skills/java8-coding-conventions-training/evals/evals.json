@@ -4,7 +4,7 @@
     {
       "id": 1,
       "prompt": "Refactor OrderService.java to follow our Java 8 coding conventions. The class has mutable state, uses loops instead of streams, throws checked exceptions, uses null returns, and has methods doing too many things.",
-      "expected_output": "Refactored OrderService with: final fields, constructor injection, streams instead of loops, Optional instead of null, unchecked exceptions, small focused methods, all variables final",
+      "expected_output": "Refactored OrderService with: final fields, constructor injection, streams instead of loops, Optional instead of null, unchecked exceptions, small focused methods, all variables final, no Java 9+ features",
       "files": ["evals/files/OrderService.java"],
       "assertions": [
         {"id": "all-vars-final", "text": "All local variables and parameters use final keyword"},
@@ -12,14 +12,15 @@
         {"id": "streams-over-loops", "text": "No for/while loops — all collection processing uses streams"},
         {"id": "optional-not-null", "text": "Methods that may not find a result return Optional instead of null"},
         {"id": "immutable-fields", "text": "All fields are private final"},
-        {"id": "small-methods", "text": "No method exceeds ~15 lines of logic"},
-        {"id": "no-java9-features", "text": "No Java 9+ features used"}
+        {"id": "small-methods", "text": "No method exceeds ~20 lines of logic"},
+        {"id": "no-java9-features", "text": "No Java 9+ features used"},
+        {"id": "unmodifiable-collections", "text": "Collections use Collections.unmodifiable* wrappers"}
       ]
     },
     {
       "id": 2,
       "prompt": "Refactor UserProfile.java to follow our Java 8 conventions. It's a mutable JavaBean with getters/setters and imperative collection code.",
-      "expected_output": "Immutable UserProfile with: private final fields, constructor sets everything, no setters, unmodifiable collection return, streams for collection methods, all variables final",
+      "expected_output": "Immutable UserProfile with: private final fields, constructor sets everything, no setters, unmodifiable collection return, streams for collection methods, all variables final, no Java 9+ features",
       "files": ["evals/files/UserProfile.java"],
       "assertions": [
         {"id": "all-vars-final", "text": "All local variables and parameters use final keyword"},
@@ -34,7 +35,7 @@
     {
       "id": 3,
       "prompt": "Write a Java 8 service class called InventoryService that manages a product inventory. It should support: finding products by category, calculating total stock value, finding the most expensive product, and getting a summary of stock levels grouped by category. Use a ProductRepository dependency for data access.",
-      "expected_output": "New class following all conventions: final fields, constructor injection, streams for all collection ops, Optional for find methods, small focused methods, no loops, all variables final",
+      "expected_output": "New class following all conventions: final fields, constructor injection, streams for all collection ops, Optional for find methods, small focused methods, no loops, all variables final, no Java 9+ features",
       "files": [],
       "assertions": [
         {"id": "all-vars-final", "text": "All local variables and parameters use final keyword"},

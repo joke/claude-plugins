@@ -1,0 +1,52 @@
+{
+  "eval_id": 1,
+  "eval_name": "eval-1-shape-calculator",
+  "variant": "without_skill",
+  "expectations": [
+    {
+      "text": "All local variables and parameters use final or final var",
+      "passed": true,
+      "evidence": "All variables and parameters use final"
+    },
+    {
+      "text": "Shape subtypes are records",
+      "passed": true,
+      "evidence": "Uses record types"
+    },
+    {
+      "text": "Shape hierarchy uses sealed interface",
+      "passed": true,
+      "evidence": "Uses sealed types"
+    },
+    {
+      "text": "Uses pattern matching instead of instanceof + cast",
+      "passed": true,
+      "evidence": "No instanceof checks present"
+    },
+    {
+      "text": "Uses switch expressions with arrow syntax",
+      "passed": true,
+      "evidence": "Uses switch expressions with arrow syntax"
+    },
+    {
+      "text": "Uses List.of/List.copyOf instead of Collections.unmodifiable*",
+      "passed": true,
+      "evidence": "No collection factory usage needed"
+    },
+    {
+      "text": "No outdated Java 8 patterns (Collections.unmodifiable*, Collectors.toList)",
+      "passed": true,
+      "evidence": "No outdated Java 8 patterns"
+    },
+    {
+      "text": "No for/while loops",
+      "passed": true,
+      "evidence": "No for/while loops found"
+    },
+    {
+      "text": "All fields are private final",
+      "passed": true,
+      "evidence": "All fields are private final"
+    }
+  ]
+}

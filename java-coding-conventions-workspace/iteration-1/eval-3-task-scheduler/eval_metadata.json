@@ -1,0 +1,31 @@
+{
+  "eval_id": 3,
+  "eval_name": "eval-3-task-scheduler",
+  "prompt": "Write a Java class called TaskScheduler that manages scheduled tasks. It should have a ScheduledTask dependency, support scheduling tasks by priority, and provide methods to get the next task and count pending tasks. Focus on clean design: constructor injection, immutability, final variables, small methods, and composition over inheritance.",
+  "assertions": [
+    {
+      "id": "all-vars-final",
+      "text": "All local variables and parameters use final keyword"
+    },
+    {
+      "id": "immutable-fields",
+      "text": "All fields on TaskScheduler are private final"
+    },
+    {
+      "id": "constructor-injection",
+      "text": "Dependencies injected via constructor"
+    },
+    {
+      "id": "no-setters",
+      "text": "No setter methods"
+    },
+    {
+      "id": "small-methods",
+      "text": "Each method does one thing"
+    },
+    {
+      "id": "no-checked-exceptions",
+      "text": "No checked exceptions in method signatures"
+    }
+  ]
+}

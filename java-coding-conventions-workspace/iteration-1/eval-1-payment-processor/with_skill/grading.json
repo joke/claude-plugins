@@ -1,0 +1,37 @@
+{
+  "eval_id": 1,
+  "eval_name": "eval-1-payment-processor",
+  "variant": "with_skill",
+  "expectations": [
+    {
+      "text": "All local variables and parameters use final keyword",
+      "passed": true,
+      "evidence": "All variables and parameters use final"
+    },
+    {
+      "text": "No checked exceptions in method signatures",
+      "passed": true,
+      "evidence": "No checked exceptions in signatures"
+    },
+    {
+      "text": "All fields are private final",
+      "passed": true,
+      "evidence": "All fields are private final"
+    },
+    {
+      "text": "No method exceeds ~20 lines of logic",
+      "passed": true,
+      "evidence": "All methods are reasonably small"
+    },
+    {
+      "text": "No setter methods exist",
+      "passed": true,
+      "evidence": "No setter methods"
+    },
+    {
+      "text": "Dependencies injected via constructor",
+      "passed": true,
+      "evidence": "Constructor injection used"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "eval_id": 2,
+  "eval_name": "eval-2-user-profile",
+  "variant": "with_skill",
+  "expectations": [
+    {
+      "text": "All local variables and parameters use final keyword",
+      "passed": true,
+      "evidence": "All variables and parameters use final"
+    },
+    {
+      "text": "No setter methods exist",
+      "passed": true,
+      "evidence": "No setter methods"
+    },
+    {
+      "text": "All fields are private final",
+      "passed": true,
+      "evidence": "All fields are private final"
+    },
+    {
+      "text": "Single constructor that accepts and sets all fields",
+      "passed": true,
+      "evidence": "Constructor accepts all fields"
+    },
+    {
+      "text": "Collection getters return unmodifiable views",
+      "passed": true,
+      "evidence": "Uses Collections.unmodifiable* collections"
+    },
+    {
+      "text": "No for/while loops",
+      "passed": true,
+      "evidence": "No for/while loops found"
+    },
+    {
+      "text": "No Java 9+ features used",
+      "passed": true,
+      "evidence": "No Java 9+ features"
+    }
+  ]
+}
