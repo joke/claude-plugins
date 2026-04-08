@@ -567,6 +567,42 @@ def check_unmodifiable_collections_java11(code):
 
 
 # ---------------------------------------------------------------------------
+# Java 17 checkers
+# ---------------------------------------------------------------------------
+
+def check_no_post_java17_features(code):
+    """Check that no Java 18+ features are used.
+
+    Java 17 allows: records, sealed, instanceof pattern matching, text blocks,
+    switch expressions with ->, Stream.toList(), Stream.mapMulti(), helpful NPEs.
+    Forbidden (Java 21+): pattern matching for switch, record patterns,
+    virtual threads, SequencedCollection/SequencedMap, scoped values,
+    string templates."""
+    issues = []
+    # Pattern matching for switch: `case Type x ->` inside a switch
+    # (instanceof pattern matching is fine, switch-case Type is not)
+    if re.search(r'case\s+\w+(?:<[^>]+>)?\s+\w+\s*->', code):
+        issues.append("pattern matching for switch (Java 21)")
+    if re.search(r'case\s+\w+\s*\([^)]*\)\s*->', code):
+        issues.append("record patterns (Java 21)")
+    if re.search(r'Thread\.ofVirtual\b', code) or re.search(r'Thread\.startVirtualThread\b', code):
+        issues.append("virtual threads (Java 21)")
+    if re.search(r'Executors\.newVirtualThreadPerTaskExecutor\b', code):
+        issues.append("virtual thread executor (Java 21)")
+    if re.search(r'\bSequencedCollection\b', code) or re.search(r'\bSequencedMap\b', code) \
+            or re.search(r'\bSequencedSet\b', code):
+        issues.append("sequenced collections (Java 21)")
+    if re.search(r'\bScopedValue\b', code):
+        issues.append("scoped values (Java 21 preview)")
+    # String templates: STR."..." / FMT."..."
+    if re.search(r'\b(?:STR|FMT|RAW)\."', code):
+        issues.append("string templates (Java 21 preview)")
+    if issues:
+        return False, "Post-Java 17 features found: " + ", ".join(issues)
+    return True, "No post-Java 17 features"
+
+
+# ---------------------------------------------------------------------------
 # Lombok checkers
 # ---------------------------------------------------------------------------
 
@@ -709,6 +745,9 @@ CHECKERS = {
     # Java 11
     'no-post-java11-features': check_no_post_java11_features,
     'unmodifiable-collections-java11': check_unmodifiable_collections_java11,
+
+    # Java 17
+    'no-post-java17-features': check_no_post_java17_features,
 
     # Java 25
     'uses-records': check_uses_records,

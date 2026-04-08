@@ -1,0 +1,48 @@
+{
+  "skill_name": "java17-coding-conventions",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Refactor OrderService.java to follow our Java 17 coding conventions. The class has mutable state, uses loops instead of streams, throws checked exceptions, uses null returns, and builds a report via string concatenation. Use records, streams, Optional, switch expressions, text blocks, Stream.toList(), final var, and List.of/copyOf where appropriate.",
+      "expected_output": "Refactored OrderService with: final fields, constructor injection, streams instead of loops, Optional instead of null, unchecked exceptions, small focused methods, final var locals, Stream.toList()/List.copyOf for immutable results, text block for the report template, no post-Java 17 features.",
+      "files": ["evals/files/OrderService.java"],
+      "assertions": [
+        {"id": "all-vars-final-or-var", "text": "All local variables and parameters use final (final var allowed)"},
+        {"id": "no-checked-exceptions", "text": "No checked exceptions in method signatures"},
+        {"id": "streams-over-loops", "text": "No for/while loops — all collection processing uses streams"},
+        {"id": "optional-not-null", "text": "Methods that may not find a result return Optional instead of null"},
+        {"id": "immutable-fields", "text": "All fields are private final"},
+        {"id": "small-methods", "text": "No method exceeds ~20 lines of logic"},
+        {"id": "uses-text-blocks", "text": "Multi-line strings use text blocks"},
+        {"id": "modern-collections", "text": "Uses Stream.toList() / List.of / List.copyOf"},
+        {"id": "no-post-java17-features", "text": "No post-Java 17 features used"}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Refactor UserProfile.java to follow our Java 17 conventions. It's a mutable JavaBean with getters/setters and imperative collection code. Convert it to a record (records are the idiomatic choice for data carriers in Java 17). Replace the imperative hasRole / getActiveRoles methods with stream-based implementations, and defensively copy the roles list in the compact constructor.",
+      "expected_output": "UserProfile is a record with a compact constructor that uses List.copyOf for defensive copy. hasRole and getActiveRoles use streams. No setters. No post-Java 17 features.",
+      "files": ["evals/files/UserProfile.java"],
+      "assertions": [
+        {"id": "uses-records", "text": "UserProfile is a record"},
+        {"id": "no-setters", "text": "No setter methods exist"},
+        {"id": "streams-over-loops", "text": "No for/while loops"},
+        {"id": "modern-collections", "text": "Uses Stream.toList() / List.copyOf"},
+        {"id": "no-post-java17-features", "text": "No post-Java 17 features used"}
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Write a Java 17 payment processing module in package com.example.payment. Define a sealed interface PaymentResult permitting three record implementations: Success(String transactionId), Declined(String reason), and Error(String message). Then write a PaymentDispatcher class with a single method 'describe(PaymentResult result)' that returns a human-readable String. Use instanceof pattern matching (pattern matching for switch is NOT available in Java 17). Use final var locals and final pattern variables.",
+      "expected_output": "sealed interface PaymentResult with three record subtypes, PaymentDispatcher.describe using instanceof pattern matching with final pattern variables. No post-Java 17 features.",
+      "files": [],
+      "assertions": [
+        {"id": "uses-records", "text": "Records used for PaymentResult subtypes"},
+        {"id": "uses-sealed", "text": "Uses sealed interface for PaymentResult"},
+        {"id": "uses-pattern-matching", "text": "Uses instanceof pattern matching with final pattern variables"},
+        {"id": "all-vars-final-or-var", "text": "All local variables and parameters use final (final var allowed)"},
+        {"id": "no-post-java17-features", "text": "No post-Java 17 features used"}
+      ]
+    }
+  ]
+}
