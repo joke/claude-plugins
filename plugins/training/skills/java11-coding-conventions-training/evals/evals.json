@@ -1,0 +1,51 @@
+{
+  "skill_name": "java11-coding-conventions",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Refactor OrderService.java to follow our Java 11 coding conventions. The class has mutable state, uses loops instead of streams, throws checked exceptions, uses null returns, and has methods doing too many things.",
+      "expected_output": "Refactored OrderService with: final fields, constructor injection, streams instead of loops, Optional instead of null, unchecked exceptions, small focused methods, all variables final (final var where obvious), immutable collections via List.of/copyOf or Collectors.toUnmodifiableList, no post-Java 11 features",
+      "files": ["evals/files/OrderService.java"],
+      "assertions": [
+        {"id": "all-vars-final-or-var", "text": "All local variables and parameters use final (final var allowed)"},
+        {"id": "no-checked-exceptions", "text": "No checked exceptions in method signatures"},
+        {"id": "streams-over-loops", "text": "No for/while loops — all collection processing uses streams"},
+        {"id": "optional-not-null", "text": "Methods that may not find a result return Optional instead of null"},
+        {"id": "immutable-fields", "text": "All fields are private final"},
+        {"id": "small-methods", "text": "No method exceeds ~20 lines of logic"},
+        {"id": "no-post-java11-features", "text": "No post-Java 11 features used"},
+        {"id": "unmodifiable-collections-java11", "text": "Collections are immutable via List.of/copyOf or Collections.unmodifiable*"}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Refactor UserProfile.java to follow our Java 11 conventions. It's a mutable JavaBean with getters/setters and imperative collection code.",
+      "expected_output": "Immutable UserProfile with: private final fields, constructor sets everything, no setters, immutable collections via List.copyOf, streams for collection methods, final var locals, no post-Java 11 features",
+      "files": ["evals/files/UserProfile.java"],
+      "assertions": [
+        {"id": "all-vars-final-or-var", "text": "All local variables and parameters use final (final var allowed)"},
+        {"id": "no-setters", "text": "No setter methods exist"},
+        {"id": "immutable-fields", "text": "All fields are private final"},
+        {"id": "constructor-sets-all", "text": "Single constructor that accepts and sets all fields"},
+        {"id": "unmodifiable-collections-java11", "text": "Collections are immutable via List.copyOf or similar"},
+        {"id": "streams-over-loops", "text": "No for/while loops"},
+        {"id": "no-post-java11-features", "text": "No post-Java 11 features used"}
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Write a Java 11 service class called InventoryService that manages a product inventory. It should support: finding products by category, calculating total stock value, finding the most expensive product, and getting a summary of stock levels grouped by category. Use a ProductRepository dependency for data access.",
+      "expected_output": "New class following all conventions: final fields, constructor injection, streams for all collection ops, Optional for find methods, small focused methods, final var locals, List.of/copyOf where appropriate, no post-Java 11 features",
+      "files": [],
+      "assertions": [
+        {"id": "all-vars-final-or-var", "text": "All local variables and parameters use final (final var allowed)"},
+        {"id": "immutable-fields", "text": "All fields on InventoryService are private final"},
+        {"id": "constructor-injection", "text": "Dependencies injected via constructor"},
+        {"id": "streams-everywhere", "text": "No for/while loops"},
+        {"id": "optional-for-find", "text": "Find methods return Optional"},
+        {"id": "small-methods", "text": "Each method does one thing"},
+        {"id": "no-post-java11-features", "text": "No post-Java 11 features used"}
+      ]
+    }
+  ]
+}

@@ -23,14 +23,15 @@ from .checkers import CHECKERS
 
 
 def read_java_files(directory):
-    """Read all .java files in directory, return concatenated content."""
+    """Read all .java files in directory (recursively), return concatenated content."""
     content = ""
     if not os.path.isdir(directory):
         return content
-    for f in sorted(os.listdir(directory)):
-        if f.endswith(".java"):
-            with open(os.path.join(directory, f)) as fh:
-                content += fh.read() + "\n"
+    for root, _dirs, files in os.walk(directory):
+        for f in sorted(files):
+            if f.endswith(".java"):
+                with open(os.path.join(root, f)) as fh:
+                    content += fh.read() + "\n"
     return content
 
 

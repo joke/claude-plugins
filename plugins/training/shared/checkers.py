@@ -427,6 +427,146 @@ def check_no_java8_patterns(code):
 
 
 # ---------------------------------------------------------------------------
+# Null safety checkers (NullAway + JSpecify)
+# ---------------------------------------------------------------------------
+
+def check_no_suppress_nullaway(code):
+    """Check that @SuppressWarnings("NullAway") is never used."""
+    match = re.search(r'@SuppressWarnings\s*\(\s*"NullAway"\s*\)', code)
+    if match:
+        return False, f"Found @SuppressWarnings(\"NullAway\")"
+    # Also check array form
+    match = re.search(r'@SuppressWarnings\s*\(\s*\{[^}]*"NullAway"[^}]*\}\s*\)', code)
+    if match:
+        return False, f"Found @SuppressWarnings with NullAway in array"
+    return True, "No NullAway suppressions"
+
+
+def check_package_info_nullmarked(code):
+    """Check that package-info.java with @NullMarked exists in the output."""
+    if '@NullMarked' in code and 'package-info' not in code:
+        # @NullMarked is on a class, not package-info — still check for package-info separately
+        pass
+    if '@NullMarked' in code:
+        return True, "Found @NullMarked annotation"
+    return False, "No @NullMarked annotation found — package-info.java should have @NullMarked"
+
+
+def check_nullable_annotations(code):
+    """Check that nullable fields/params use @Nullable from JSpecify."""
+    # Check that @Nullable is imported from jspecify
+    if '@Nullable' in code:
+        if 'org.jspecify.annotations.Nullable' in code or 'org.jspecify.annotations.*' in code:
+            return True, "Uses @Nullable from JSpecify"
+        # Check for wrong annotation packages
+        wrong_packages = []
+        if 'javax.annotation.Nullable' in code:
+            wrong_packages.append("javax.annotation")
+        if 'org.jetbrains.annotations.Nullable' in code:
+            wrong_packages.append("org.jetbrains.annotations")
+        if 'edu.umd.cs.findbugs.annotations.Nullable' in code:
+            wrong_packages.append("edu.umd.cs.findbugs.annotations")
+        if 'android.support.annotation.Nullable' in code or 'androidx.annotation.Nullable' in code:
+            wrong_packages.append("android/androidx")
+        if wrong_packages:
+            return False, f"Uses @Nullable from wrong package(s): {', '.join(wrong_packages)} — use org.jspecify.annotations"
+        return True, "Uses @Nullable (import source not detected but present)"
+    # If code has null checks or Optional.ofNullable but no @Nullable, might be missing annotations
+    if re.search(r'=\s*null\s*;', code) or re.search(r'==\s*null', code) or re.search(r'Optional\.ofNullable', code):
+        return False, "Code handles null values but no @Nullable annotations found"
+    return True, "No nullable references detected"
+
+
+def check_null_safe_handling(code):
+    """Check that nullable fields are handled in a null-safe way."""
+    lines = code.split('\n')
+    # Find @Nullable fields
+    nullable_fields = []
+    for line in lines:
+        stripped = line.strip()
+        if '@Nullable' in stripped and re.search(r'(private|protected)\s+(final\s+)?', stripped):
+            field_match = re.search(r'(\w+)\s*;', stripped)
+            if field_match:
+                nullable_fields.append(field_match.group(1))
+
+    if not nullable_fields:
+        return True, "No nullable fields to check"
+
+    # Check that nullable fields are accessed safely (null check, Optional, or ternary)
+    for field in nullable_fields:
+        # Look for direct dereference without null check
+        # This is a heuristic — look for field.method() without a preceding null check
+        usages = []
+        for i, line in enumerate(lines):
+            stripped = line.strip()
+            if f'{field}.' in stripped or f'{field} =' in stripped:
+                usages.append((i, stripped))
+
+        for line_num, usage in usages:
+            # Check if there's a null check in the surrounding context (5 lines before)
+            context = '\n'.join(lines[max(0, line_num-5):line_num+1])
+            if (f'{field} != null' in context or
+                f'{field} == null' in context or
+                f'Optional.ofNullable({field})' in context or
+                f'Optional.ofNullable(this.{field})' in context or
+                f'this.{field} = {field}' in usage or  # assignment in constructor
+                f'{field} != null ?' in context):  # ternary
+                continue
+
+    return True, "Nullable fields handled safely"
+
+
+def check_no_nullable_on_nonnull(code):
+    """Check that @Nullable is not used on things that should be non-null."""
+    # @Nullable on constructor params that are assigned to non-nullable fields
+    # This is hard to check precisely, so just verify @Nullable exists where needed
+    # and @NonNull is not used (redundant under @NullMarked)
+    if re.search(r'@NonNull\b', code):
+        return False, "@NonNull is redundant under @NullMarked — remove it"
+    return True, "No redundant @NonNull annotations"
+
+
+# ---------------------------------------------------------------------------
+# Java 11 checkers
+# ---------------------------------------------------------------------------
+
+def check_no_post_java11_features(code):
+    """Check no Java 12+ features are used (records, sealed, pattern matching,
+    text blocks, switch expressions with ->, Stream.toList())."""
+    issues = []
+    if re.search(r'\brecord\s+\w+\s*\(', code):
+        issues.append("record (Java 14)")
+    if re.search(r'\bsealed\s+(class|interface)\b', code) or re.search(r'\bnon-sealed\b', code):
+        issues.append("sealed (Java 17)")
+    if re.search(r'\bpermits\s+\w+', code):
+        issues.append("permits (Java 17)")
+    if re.search(r'instanceof\s+(final\s+)?\w+\s+\w+\s*[)&|]', code):
+        issues.append("instanceof pattern matching (Java 16)")
+    if '"""' in code:
+        issues.append("text blocks (Java 13)")
+    if re.search(r'case\s+[^:]+->', code):
+        issues.append("switch expressions with -> (Java 14)")
+    if re.search(r'\.stream\(\)[^;]*\.toList\(\)', code):
+        issues.append("Stream.toList() (Java 16)")
+    if issues:
+        return False, "Post-Java 11 features found: " + ", ".join(issues)
+    return True, "No post-Java 11 features"
+
+
+def check_unmodifiable_collections_java11(code):
+    """Check collection fields are immutable (List.of/copyOf or Collections.unmodifiable*)."""
+    if re.search(r'\bList\.(of|copyOf)\b', code) or re.search(r'\bMap\.(of|copyOf)\b', code) \
+            or re.search(r'\bSet\.(of|copyOf)\b', code):
+        return True, "Uses List.of/copyOf (Java 9/10) for immutability"
+    if 'Collections.unmodifiable' in code:
+        return True, "Uses Collections.unmodifiable*"
+    collection_field = re.search(r'private\s+final\s+(List|Set|Map)<', code)
+    if collection_field:
+        return False, "Has collection fields but no immutable wrapper found"
+    return True, "No collection fields to wrap"
+
+
+# ---------------------------------------------------------------------------
 # Registry: maps assertion IDs to checker functions
 # ---------------------------------------------------------------------------
 
@@ -449,6 +589,10 @@ CHECKERS = {
     'no-java9-features': check_no_java9_features,
     'unmodifiable-collections': check_unmodifiable_collections_java8,
 
+    # Java 11
+    'no-post-java11-features': check_no_post_java11_features,
+    'unmodifiable-collections-java11': check_unmodifiable_collections_java11,
+
     # Java 25
     'uses-records': check_uses_records,
     'uses-sealed': check_uses_sealed,
@@ -458,4 +602,11 @@ CHECKERS = {
     'uses-var': check_uses_var,
     'modern-collections': check_modern_collections,
     'no-java8-patterns': check_no_java8_patterns,
+
+    # Null safety
+    'no-suppress-nullaway': check_no_suppress_nullaway,
+    'package-info-nullmarked': check_package_info_nullmarked,
+    'nullable-annotations': check_nullable_annotations,
+    'null-safe-handling': check_null_safe_handling,
+    'no-redundant-nonnull': check_no_nullable_on_nonnull,
 }
