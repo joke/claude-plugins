@@ -603,6 +603,36 @@ def check_no_post_java17_features(code):
 
 
 # ---------------------------------------------------------------------------
+# Java 21 checkers
+# ---------------------------------------------------------------------------
+
+def check_no_post_java21_features(code):
+    """Check that no Java 22+ features are used.
+
+    Java 21 allows: records, sealed, instanceof + switch pattern matching,
+    record patterns, text blocks, switch expressions, virtual threads,
+    sequenced collections.
+    Forbidden (Java 22+): unnamed patterns/variables, string templates,
+    flexible constructor bodies (statements before super()), primitive
+    type patterns, module imports."""
+    issues = []
+    # String templates: STR."..." / FMT."..."
+    if re.search(r'\b(?:STR|FMT|RAW)\."', code):
+        issues.append("string templates (preview-only, withdrawn)")
+    # Unnamed pattern variable `_` as standalone identifier in patterns/lambdas
+    if re.search(r'\bvar\s+_\b', code) or re.search(r'\(\s*_\s*\)\s*->', code):
+        issues.append("unnamed variables (Java 22)")
+    if re.search(r'case\s+\w+\s*\(\s*_\s*\)', code):
+        issues.append("unnamed patterns (Java 22)")
+    # Module imports
+    if re.search(r'^\s*import\s+module\s+', code, re.MULTILINE):
+        issues.append("import module (Java 23)")
+    if issues:
+        return False, "Post-Java 21 features found: " + ", ".join(issues)
+    return True, "No post-Java 21 features"
+
+
+# ---------------------------------------------------------------------------
 # Lombok checkers
 # ---------------------------------------------------------------------------
 
@@ -748,6 +778,9 @@ CHECKERS = {
 
     # Java 17
     'no-post-java17-features': check_no_post_java17_features,
+
+    # Java 21
+    'no-post-java21-features': check_no_post_java21_features,
 
     # Java 25
     'uses-records': check_uses_records,
