@@ -1,0 +1,42 @@
+{
+  "skill_name": "lombok-coding-conventions",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Refactor UserDto.java to follow our Lombok-first conventions. The class has hand-written getters, setters, a constructor, toString(), and equals/hashCode that should all be replaced with Lombok annotations. Lombok is on the classpath. Output the refactored UserDto.java.",
+      "expected_output": "UserDto using @Data (or equivalent @Getter/@Setter/@ToString/@EqualsAndHashCode/@RequiredArgsConstructor combination) with no manual getters, setters, toString, equals, or hashCode.",
+      "files": ["evals/files/UserDto.java"],
+      "assertions": [
+        {"id": "no-manual-getter-setter", "text": "No hand-written getter or setter methods"},
+        {"id": "no-manual-tostring", "text": "No hand-written toString() override"},
+        {"id": "no-manual-equals-hashcode", "text": "No hand-written equals() or hashCode()"},
+        {"id": "uses-lombok-annotations", "text": "Uses Lombok annotations for data-class boilerplate"},
+        {"id": "no-lombok-val-var", "text": "Does not import lombok.val or lombok.var"}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Refactor GreetingService.java to follow our Lombok-first conventions. The class has a hand-written @Inject constructor and a manual SLF4J Logger field. Replace them with the appropriate Lombok annotations. Lombok is on the classpath.",
+      "expected_output": "GreetingService with @RequiredArgsConstructor(onConstructor_ = @Inject) and @Slf4j, no manual constructor body, no manual Logger field.",
+      "files": ["evals/files/GreetingService.java"],
+      "assertions": [
+        {"id": "uses-onconstructor-inject", "text": "Constructor injection uses onConstructor_ instead of a hand-written constructor"},
+        {"id": "uses-slf4j-annotation", "text": "Uses @Slf4j (or variant) instead of a manual Logger field"},
+        {"id": "uses-lombok-annotations", "text": "Uses Lombok annotations"},
+        {"id": "no-lombok-val-var", "text": "Does not import lombok.val or lombok.var"}
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Write two new Java classes in package com.example.util. First, a utility class StringUtils with a static method isBlank(String s) that returns true if the string is null or only whitespace. Second, a ValidationException that extends RuntimeException and supports the four standard constructors (no-arg, message, cause, message+cause). Use Lombok wherever possible — the project has Lombok on the classpath.",
+      "expected_output": "StringUtils annotated with @UtilityClass (no manual private constructor, no static keyword on methods). ValidationException annotated with @StandardException (no hand-written constructors).",
+      "files": [],
+      "assertions": [
+        {"id": "uses-utility-class", "text": "StringUtils uses @UtilityClass"},
+        {"id": "uses-standard-exception", "text": "ValidationException uses @StandardException"},
+        {"id": "uses-lombok-annotations", "text": "Uses Lombok annotations"},
+        {"id": "no-lombok-val-var", "text": "Does not import lombok.val or lombok.var"}
+      ]
+    }
+  ]
+}

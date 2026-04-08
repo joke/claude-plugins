@@ -567,6 +567,123 @@ def check_unmodifiable_collections_java11(code):
 
 
 # ---------------------------------------------------------------------------
+# Lombok checkers
+# ---------------------------------------------------------------------------
+
+_LOMBOK_ANNOTATIONS = [
+    '@Getter', '@Setter', '@ToString', '@EqualsAndHashCode',
+    '@NoArgsConstructor', '@RequiredArgsConstructor', '@AllArgsConstructor',
+    '@Data', '@Value', '@Builder', '@SuperBuilder', '@Singular',
+    '@Cleanup', '@SneakyThrows', '@Delegate', '@UtilityClass',
+    '@StandardException', '@FieldNameConstants',
+    '@Slf4j', '@Log4j2', '@Log', '@CommonsLog', '@Flogger', '@JBossLog',
+]
+
+
+def check_no_manual_getter_setter(code):
+    """Fail on hand-written getters/setters that simply return/assign a field."""
+    # Setter: public void setX(Type x) { this.x = x; }
+    setter = re.search(
+        r'public\s+void\s+set[A-Z]\w*\s*\([^)]*\)\s*\{\s*this\.\w+\s*=',
+        code, re.DOTALL)
+    if setter:
+        return False, f"Manual setter found: '{setter.group(0).splitlines()[0]}'"
+    # Getter: public Type getX() { return x; } / isX()
+    getter = re.search(
+        r'public\s+\w+(?:<[^>]+>)?\s+(?:get|is)[A-Z]\w*\s*\(\s*\)\s*\{\s*return\s+\w+\s*;\s*\}',
+        code)
+    if getter:
+        return False, f"Manual getter found: '{getter.group(0).splitlines()[0]}'"
+    return True, "No hand-written getters or setters"
+
+
+def check_no_manual_tostring(code):
+    """Fail on hand-written toString() override."""
+    match = re.search(r'public\s+String\s+toString\s*\(\s*\)\s*\{', code)
+    if match:
+        return False, "Manual toString() found — use @ToString"
+    return True, "No manual toString()"
+
+
+def check_no_manual_equals_hashcode(code):
+    """Fail on hand-written equals()/hashCode()."""
+    if re.search(r'public\s+boolean\s+equals\s*\(\s*Object\s+\w+\s*\)\s*\{', code):
+        return False, "Manual equals() found — use @EqualsAndHashCode"
+    if re.search(r'public\s+int\s+hashCode\s*\(\s*\)\s*\{', code):
+        return False, "Manual hashCode() found — use @EqualsAndHashCode"
+    return True, "No manual equals/hashCode"
+
+
+def check_uses_lombok_annotations(code):
+    """Check at least one Lombok annotation is present."""
+    for ann in _LOMBOK_ANNOTATIONS:
+        if re.search(re.escape(ann) + r'\b', code):
+            return True, f"Uses Lombok annotation {ann}"
+    return False, "No Lombok annotations found"
+
+
+def check_no_lombok_val_var(code):
+    """Fail if lombok.val or lombok.var is imported or used."""
+    if re.search(r'import\s+lombok\.val\s*;', code) or re.search(r'import\s+lombok\.var\s*;', code):
+        return False, "Imports lombok.val/lombok.var — use Java's native var"
+    return True, "Does not use lombok.val/lombok.var"
+
+
+def check_uses_onconstructor_inject(code):
+    """If @Inject/@Autowired appears, it must be via onConstructor_ on a
+    @*ArgsConstructor annotation, not a hand-written constructor."""
+    has_inject = '@Inject' in code or '@Autowired' in code
+    if not has_inject:
+        return True, "No @Inject/@Autowired in code"
+    if 'onConstructor_' in code:
+        # And no hand-written constructor carrying @Inject/@Autowired directly
+        manual = re.search(
+            r'@(?:Inject|Autowired)\s+\w+\s+\w+\s*\([^)]*\)\s*\{',
+            code)
+        if manual:
+            return False, "Hand-written @Inject/@Autowired constructor still present"
+        return True, "Uses onConstructor_ for injection"
+    return False, "@Inject/@Autowired present but no onConstructor_ — use @RequiredArgsConstructor(onConstructor_ = @Inject)"
+
+
+def check_uses_slf4j_annotation(code):
+    """If a manual Logger field exists, fail. If @Slf4j (or variant) exists, pass."""
+    if re.search(r'@(Slf4j|Log4j2|Log|CommonsLog|Flogger|JBossLog)\b', code):
+        # Ensure no manual Logger field remains
+        if re.search(r'(private|protected|public)\s+(static\s+)?(final\s+)?Logger\s+\w+\s*=', code):
+            return False, "Both @Slf4j and a manual Logger field present"
+        return True, "Uses Lombok logger annotation"
+    if re.search(r'Logger\s+\w+\s*=\s*LoggerFactory\.getLogger', code):
+        return False, "Manual Logger field — use @Slf4j"
+    if 'LoggerFactory.getLogger' in code:
+        return False, "Manual LoggerFactory.getLogger usage — use @Slf4j"
+    return True, "No logger required"
+
+
+def check_uses_utility_class(code):
+    """Check @UtilityClass is present for classes that look like utility classes."""
+    if '@UtilityClass' in code:
+        return True, "Uses @UtilityClass"
+    # Heuristic: class with only static methods and a private constructor
+    if re.search(r'class\s+\w*Utils?\b', code) or re.search(r'class\s+\w*Helper\b', code):
+        return False, "Utility-style class missing @UtilityClass"
+    return True, "Not a utility class"
+
+
+def check_uses_standard_exception(code):
+    """Check @StandardException is present for exception classes with the four
+    standard constructors."""
+    if '@StandardException' in code:
+        # Make sure manual standard constructors are not also present
+        if re.search(r'public\s+\w*Exception\s*\(\s*String\s+\w+\s*\)\s*\{', code):
+            return False, "Both @StandardException and manual constructors present"
+        return True, "Uses @StandardException"
+    if re.search(r'class\s+\w+\s+extends\s+\w*Exception', code):
+        return False, "Exception class missing @StandardException"
+    return True, "Not an exception class"
+
+
+# ---------------------------------------------------------------------------
 # Registry: maps assertion IDs to checker functions
 # ---------------------------------------------------------------------------
 
@@ -609,4 +726,15 @@ CHECKERS = {
     'nullable-annotations': check_nullable_annotations,
     'null-safe-handling': check_null_safe_handling,
     'no-redundant-nonnull': check_no_nullable_on_nonnull,
+
+    # Lombok
+    'no-manual-getter-setter': check_no_manual_getter_setter,
+    'no-manual-tostring': check_no_manual_tostring,
+    'no-manual-equals-hashcode': check_no_manual_equals_hashcode,
+    'uses-lombok-annotations': check_uses_lombok_annotations,
+    'no-lombok-val-var': check_no_lombok_val_var,
+    'uses-onconstructor-inject': check_uses_onconstructor_inject,
+    'uses-slf4j-annotation': check_uses_slf4j_annotation,
+    'uses-utility-class': check_uses_utility_class,
+    'uses-standard-exception': check_uses_standard_exception,
 }
