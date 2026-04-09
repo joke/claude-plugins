@@ -1,0 +1,44 @@
+{
+  "skill_name": "null-safety-coding-conventions",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Refactor UserService.java to follow our null safety conventions using NullAway and JSpecify. The class suppresses NullAway, has no @NullMarked package-info.java, and handles null unsafely in getEmail(). Make it null-safe with proper JSpecify annotations. Also create the package-info.java for this package.",
+      "expected_output": "Refactored UserService with: no @SuppressWarnings(\"NullAway\"), package-info.java with @NullMarked, @Nullable from JSpecify on nullable params/returns, null-safe handling via Optional or checks",
+      "files": ["evals/files/UserService.java"],
+      "assertions": [
+        {"id": "no-suppress-nullaway", "text": "No @SuppressWarnings(\"NullAway\") anywhere"},
+        {"id": "package-info-nullmarked", "text": "package-info.java with @NullMarked exists"},
+        {"id": "nullable-annotations", "text": "@Nullable from JSpecify used on nullable references"},
+        {"id": "null-safe-handling", "text": "Nullable references handled safely (checks or Optional)"},
+        {"id": "no-redundant-nonnull", "text": "No redundant @NonNull annotations"}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Refactor ProductCatalog.java to follow our null safety conventions. The class uses @Nullable from javax.annotation instead of JSpecify, is missing a package-info.java with @NullMarked, and the findByName method returns null instead of Optional. Fix the annotation imports, add package-info.java, and make findByName null-safe.",
+      "expected_output": "Refactored ProductCatalog with: JSpecify @Nullable instead of javax.annotation, package-info.java with @NullMarked, findByName returns Optional, null-safe handling",
+      "files": ["evals/files/ProductCatalog.java"],
+      "assertions": [
+        {"id": "no-suppress-nullaway", "text": "No @SuppressWarnings(\"NullAway\") anywhere"},
+        {"id": "package-info-nullmarked", "text": "package-info.java with @NullMarked exists"},
+        {"id": "nullable-annotations", "text": "@Nullable from JSpecify (not javax.annotation)"},
+        {"id": "null-safe-handling", "text": "Nullable references handled safely"},
+        {"id": "no-redundant-nonnull", "text": "No redundant @NonNull annotations"}
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Write a Java class called NotificationDispatcher in package com.example.notification. It dispatches notifications to users. It has a NotificationGateway dependency. A notification has a required recipient (String) and message (String), but an optional subject (nullable) and optional replyTo address (nullable). Write the Notification value class and the dispatcher. Include the package-info.java. Use NullAway with JSpecify annotations for null safety.",
+      "expected_output": "Notification class with @Nullable on optional fields, NotificationDispatcher with null-safe handling, package-info.java with @NullMarked, all JSpecify imports",
+      "files": [],
+      "assertions": [
+        {"id": "no-suppress-nullaway", "text": "No @SuppressWarnings(\"NullAway\") anywhere"},
+        {"id": "package-info-nullmarked", "text": "package-info.java with @NullMarked exists"},
+        {"id": "nullable-annotations", "text": "@Nullable from JSpecify on optional fields"},
+        {"id": "null-safe-handling", "text": "Nullable references handled safely"},
+        {"id": "no-redundant-nonnull", "text": "No redundant @NonNull annotations"}
+      ]
+    }
+  ]
+}
