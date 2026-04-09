@@ -11,7 +11,7 @@ model: haiku-4.5
 
 # Java 8 Code Conventions
 
-First, read and apply the general conventions from `plugins/conventions/skills/java-coding-conventions/SKILL.md`. Everything below builds on those foundations with Java 8-specific guidance.
+First, use the Skill tool to load `conventions:java-coding-conventions`. Everything below builds on those foundations with Java 8-specific guidance.
 
 ## Java 8 Version Boundary
 

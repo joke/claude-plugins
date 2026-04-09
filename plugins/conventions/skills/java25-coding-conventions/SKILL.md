@@ -11,7 +11,7 @@ model: haiku-4.5
 
 # Java 25 Code Conventions
 
-First, read and apply the general conventions from `plugins/conventions/skills/java-coding-conventions/SKILL.md`. Everything below builds on those foundations with modern Java guidance.
+First, use the Skill tool to load `conventions:java-coding-conventions`. Everything below builds on those foundations with modern Java guidance.
 
 ## Records for Data Classes
 

@@ -11,7 +11,7 @@ model: haiku-4.5
 
 # Java 17 Code Conventions
 
-First, read and apply the general conventions from `plugins/conventions/skills/java-coding-conventions/SKILL.md`. Everything below builds on those foundations with Java 17-specific guidance.
+First, use the Skill tool to load `conventions:java-coding-conventions`. Everything below builds on those foundations with Java 17-specific guidance.
 
 Java 17 is the second LTS after Java 11. Compared to Java 11, it unlocks a batch of headline features that reshape how idiomatic Java is written: **records**, **sealed types**, **pattern matching for `instanceof`**, **text blocks**, **switch expressions with `->`**, and `Stream.toList()`. It does **not** yet have pattern matching for `switch` (stable in Java 21), record patterns (21), virtual threads (21), or sequenced collections (21).
 

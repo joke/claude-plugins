@@ -11,7 +11,7 @@ model: haiku-4.5
 
 # Java 21 Code Conventions
 
-First, read and apply the general conventions from `plugins/conventions/skills/java-coding-conventions/SKILL.md`. Everything below builds on those foundations with Java 21-specific guidance.
+First, use the Skill tool to load `conventions:java-coding-conventions`. Everything below builds on those foundations with Java 21-specific guidance.
 
 Java 21 is the third LTS after Java 8 and 11 and 17. It finalises the pattern-matching story (**pattern matching for `switch`**, **record patterns**), introduces **virtual threads**, and adds **sequenced collections**. Together, these reshape how idiomatic Java is written once more: discriminated unions become ergonomic, structured concurrency becomes cheap, and encounter order gets a proper API.
 

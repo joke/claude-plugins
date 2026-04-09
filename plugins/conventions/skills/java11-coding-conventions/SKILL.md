@@ -11,7 +11,7 @@ model: haiku-4.5
 
 # Java 11 Code Conventions
 
-First, read and apply the general conventions from `plugins/conventions/skills/java-coding-conventions/SKILL.md`. Everything below builds on those foundations with Java 11-specific guidance.
+First, use the Skill tool to load `conventions:java-coding-conventions`. Everything below builds on those foundations with Java 11-specific guidance.
 
 Java 11 is the first LTS after Java 8. It brings `var`, the `List.of`/`Map.of`/`Set.of` factories, a modern `HttpClient`, and a handful of small but high-value additions to `String`, `Optional`, `Predicate`, and `Files`. It does **not** yet have records, sealed types, pattern matching, text blocks, or switch expressions — those come later.
 
