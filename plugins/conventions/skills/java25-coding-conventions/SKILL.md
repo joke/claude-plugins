@@ -6,7 +6,6 @@ description: >
   switch expressions, text blocks, var, and modern collection factories. Does not cover formatting,
   indentation, or framework-specific patterns.
 user-invocable: false
-model: haiku-4.5
 ---
 
 # Java 25 Code Conventions

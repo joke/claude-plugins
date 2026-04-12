@@ -6,7 +6,6 @@ description: >
   new String/Optional/Predicate methods, the java.net.http client, and the Java 11 version
   boundary. Does not cover formatting, indentation, or framework-specific patterns.
 user-invocable: false
-model: haiku-4.5
 ---
 
 # Java 11 Code Conventions

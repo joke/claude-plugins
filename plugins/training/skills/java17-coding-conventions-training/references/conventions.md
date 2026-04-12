@@ -6,7 +6,6 @@ description: >
   matching for instanceof, text blocks, switch expressions, Stream.toList(), and the
   Java 17 version boundary. Does not cover formatting, indentation, or framework-specific patterns.
 user-invocable: false
-model: haiku-4.5
 ---
 
 # Java 17 Code Conventions

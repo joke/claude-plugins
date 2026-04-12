@@ -6,7 +6,6 @@ description: >
   record patterns, virtual threads, sequenced collections, and the Java 21 version boundary.
   Does not cover formatting, indentation, or framework-specific patterns.
 user-invocable: false
-model: haiku-4.5
 ---
 
 # Java 21 Code Conventions

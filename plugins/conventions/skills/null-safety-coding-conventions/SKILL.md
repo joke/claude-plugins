@@ -6,7 +6,6 @@ description: >
   handling patterns. Trigger this whenever you see NullAway in the build config, JSpecify
   imports, or @NullMarked/@Nullable annotations in existing code.
 user-invocable: false
-model: haiku-4.5
 ---
 
 # Null Safety Conventions (NullAway + JSpecify)

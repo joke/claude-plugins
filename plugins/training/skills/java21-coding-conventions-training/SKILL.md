@@ -5,7 +5,6 @@ description: >
   Run this skill to regenerate the conventions from reference material and verify
   them against test cases. Use when updating or re-tuning Java 21 coding conventions.
 user-invocable: true
-model: haiku-4.5
 ---
 
 # Java 21 Coding Conventions Training

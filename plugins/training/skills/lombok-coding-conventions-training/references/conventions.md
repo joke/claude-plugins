@@ -6,7 +6,6 @@ description: >
   creation, editing, or code generation — even if the user doesn't mention Lombok.
   If `lombok.config` or a Lombok dependency exists in the project, this skill applies.
 user-invocable: false
-model: haiku-4.5
 ---
 
 # Lombok-First Java Conventions

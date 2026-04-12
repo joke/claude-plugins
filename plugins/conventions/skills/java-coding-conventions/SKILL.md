@@ -6,7 +6,6 @@ description: >
   for any Java work — it covers the universal conventions that every Java version should follow.
   Does not cover formatting, indentation, or framework-specific patterns.
 user-invocable: false
-model: haiku-4.5
 ---
 
 # Java Code Conventions

@@ -6,7 +6,6 @@ description: >
   Optional, functional interfaces, and the Java 8 version boundary. Does not cover formatting,
   indentation, or framework-specific patterns.
 user-invocable: false
-model: haiku-4.5
 ---
 
 # Java 8 Code Conventions
