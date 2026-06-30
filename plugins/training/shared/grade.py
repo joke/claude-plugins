@@ -23,13 +23,13 @@ from .checkers import CHECKERS
 
 
 def read_java_files(directory):
-    """Read all .java files in directory (recursively), return concatenated content."""
+    """Read all .java/.groovy files in directory (recursively), return concatenated content."""
     content = ""
     if not os.path.isdir(directory):
         return content
     for root, _dirs, files in os.walk(directory):
         for f in sorted(files):
-            if f.endswith(".java"):
+            if f.endswith((".java", ".groovy")):
                 with open(os.path.join(root, f)) as fh:
                     content += fh.read() + "\n"
     return content
@@ -45,7 +45,7 @@ def grade_eval(eval_dir, variant):
 
     code = read_java_files(outputs_dir)
     if not code:
-        return {"error": f"No Java files in {outputs_dir}"}
+        return {"error": f"No Java/Groovy files in {outputs_dir}"}
 
     results = {
         "eval_id": meta["eval_id"],

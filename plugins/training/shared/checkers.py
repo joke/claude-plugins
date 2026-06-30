@@ -252,6 +252,74 @@ def check_constructor_injection(code):
     return False, "No constructor injection detected"
 
 
+# A method declaration has a return type AND a name before '(' (two tokens once
+# modifiers are stripped). A constructor has only the class name (one token), so
+# this lets us tell methods from constructors without a real parser.
+_MODIFIER_RE = re.compile(r'\b(static|final|abstract|synchronized|native|default)\b')
+
+
+def _is_method_decl(head):
+    """Given the text between a visibility keyword and '(', return True if it
+    looks like a method (return type + name) rather than a constructor (name only)."""
+    stripped = _MODIFIER_RE.sub('', head).strip()
+    # Collapse generic type args so 'List<Map<K,V>> name' counts as two tokens.
+    stripped = re.sub(r'<[^<>]*(?:<[^<>]*>[^<>]*)*>', '', stripped)
+    return len(stripped.split()) >= 2
+
+
+def check_no_private_methods(code):
+    """Helper methods should be protected (+ @VisibleForTesting), not private, so
+    they can be called directly and stubbed/spied in isolation tests. Constructors
+    are exempt — they have no return type, so they are not flagged."""
+    for i, line in enumerate(code.split('\n')):
+        m = re.match(r'\s*private\s+(.*?)\s*\(', line)
+        if m and _is_method_decl(m.group(1)):
+            return False, f"private method at line {i+1}: '{line.strip()}' — make it protected + @VisibleForTesting"
+    return True, "No private methods (helpers are protected for testability)"
+
+
+def check_visible_for_testing(code):
+    """Protected helper methods exist as a test seam and should be annotated
+    @VisibleForTesting from org.jetbrains.annotations."""
+    has_protected = any(
+        re.match(r'\s*protected\s+(.*?)\s*\(', line) and _is_method_decl(re.match(r'\s*protected\s+(.*?)\s*\(', line).group(1))
+        for line in code.split('\n')
+    )
+    if not has_protected:
+        return None, "No protected methods to annotate — rule N/A"
+    if '@VisibleForTesting' not in code:
+        return False, "Protected helper methods should be annotated @VisibleForTesting"
+    if 'org.jetbrains.annotations' in code:
+        return True, "Uses @VisibleForTesting from org.jetbrains.annotations"
+    if re.search(r'import\s+com\.google\.common\.annotations\.VisibleForTesting', code):
+        return False, "@VisibleForTesting from Guava — use org.jetbrains.annotations"
+    if re.search(r'import\s+[\w.]*\.VisibleForTesting', code):
+        wrong = re.search(r'import\s+([\w.]*)\.VisibleForTesting', code).group(1)
+        return False, f"@VisibleForTesting from {wrong} — use org.jetbrains.annotations"
+    return True, "Uses @VisibleForTesting (import source not detected but present)"
+
+
+def check_instance_over_static(code):
+    """Helper methods should be instance methods (spyable), not static — unless the
+    class is a pure utility class (every method is static)."""
+    static_methods = []
+    instance_methods = []
+    for line in code.split('\n'):
+        m = re.match(r'\s*(?:public|protected|private)\s+(.*?)\s*\(', line)
+        if not m or not _is_method_decl(m.group(1)):
+            continue
+        if _MODIFIER_RE.search(m.group(1)) and 'static' in m.group(1):
+            static_methods.append(line.strip())
+        else:
+            instance_methods.append(line.strip())
+    if not static_methods:
+        return True, "No static helper methods"
+    if not instance_methods:
+        return True, "Pure utility class — all methods static (allowed)"
+    names = ', '.join(re.sub(r'\s*\{.*', '', s) for s in static_methods)
+    return False, f"Static helper(s) in a stateful class — make instance methods so they can be spied: {names}"
+
+
 # ---------------------------------------------------------------------------
 # Java 8 checkers
 # ---------------------------------------------------------------------------
@@ -750,6 +818,387 @@ def check_uses_standard_exception(code):
 
 
 # ---------------------------------------------------------------------------
+# Groovy checkers
+# ---------------------------------------------------------------------------
+
+def _code_only(code):
+    """Strip comments and string/regex contents so structural checks don't trip
+    on tokens that merely appear inside literals. Slashy strings are left intact
+    (the `/` is ambiguous with division and rarely holds the tokens we scan for)."""
+    code = re.sub(r'/\*.*?\*/', ' ', code, flags=re.DOTALL)
+    code = re.sub(r'""".*?"""', ' "" ', code, flags=re.DOTALL)
+    code = re.sub(r"'''.*?'''", " '' ", code, flags=re.DOTALL)
+    code = re.sub(r'"(?:\\.|[^"\\])*"', ' "" ', code)
+    code = re.sub(r"'(?:\\.|[^'\\])*'", " '' ", code)
+    code = re.sub(r'//[^\n]*', ' ', code)
+    return code
+
+
+def _line_of(text, pos):
+    return text[:pos].count('\n') + 1
+
+
+def check_no_semicolons(code):
+    """Groovy uses line endings, not semicolons, as statement terminators."""
+    cleaned = _code_only(code)
+    match = re.search(r';', cleaned)
+    if match:
+        return False, f"Semicolon found at line {_line_of(cleaned, match.start())}"
+    return True, "No semicolons"
+
+
+def check_no_final_keyword(code):
+    """Idiomatic Groovy is dynamically typed; immutability comes from @Immutable, not final."""
+    cleaned = _code_only(code)
+    match = re.search(r'\bfinal\b', cleaned)
+    if match:
+        return False, f"'final' keyword at line {_line_of(cleaned, match.start())}"
+    return True, "No final keyword"
+
+
+def check_no_public_modifier(code):
+    """public is the default in Groovy and should be omitted."""
+    cleaned = _code_only(code)
+    match = re.search(r'\bpublic\b', cleaned)
+    if match:
+        return False, f"'public' modifier at line {_line_of(cleaned, match.start())}"
+    return True, "No public modifier"
+
+
+def check_groovy_accessors(code):
+    """No explicit getX()/setX() calls — use property syntax."""
+    cleaned = _code_only(code)
+    getter = re.search(r'\.get[A-Z]\w*\s*\(\s*\)', cleaned)
+    if getter:
+        return False, f"Explicit getter call '{getter.group(0).strip()}' — use property access"
+    setter = re.search(r'\.set[A-Z]\w*\s*\(', cleaned)
+    if setter:
+        return False, f"Explicit setter call '{setter.group(0).strip()}' — use property assignment"
+    return True, "Uses property access, no explicit get/set calls"
+
+
+def check_no_manual_getters_setters_groovy(code):
+    """No hand-written getter/setter definitions — Groovy properties generate them."""
+    cleaned = _code_only(code)
+    getter = re.search(r'(?:\bdef\b|\b[A-Z]\w*\b|\bString\b|\bint\b|\bboolean\b|\bdouble\b|\blong\b)\s+get[A-Z]\w*\s*\(\s*\)\s*\{', cleaned)
+    if getter:
+        return False, f"Hand-written getter: '{getter.group(0).strip()}'"
+    setter = re.search(r'(?:\bdef\b|\bvoid\b)\s+set[A-Z]\w*\s*\([^)]*\)\s*\{', cleaned)
+    if setter:
+        return False, f"Hand-written setter: '{setter.group(0).strip()}'"
+    return True, "No hand-written getters/setters"
+
+
+def check_no_manual_equals_tostring_groovy(code):
+    """No hand-written equals/hashCode/toString — use an AST transform."""
+    cleaned = _code_only(code)
+    if re.search(r'\bboolean\s+equals\s*\(', cleaned):
+        return False, "Hand-written equals() — use @Immutable/@Canonical/@EqualsAndHashCode"
+    if re.search(r'\bint\s+hashCode\s*\(\s*\)', cleaned):
+        return False, "Hand-written hashCode() — use an AST transform"
+    if re.search(r'\bString\s+toString\s*\(\s*\)', cleaned):
+        return False, "Hand-written toString() — use @ToString"
+    if re.search(r'\bdef\s+(equals|hashCode|toString)\s*\(', cleaned):
+        return False, "Hand-written equals/hashCode/toString — use an AST transform"
+    return True, "No hand-written equals/hashCode/toString"
+
+
+def check_ast_immutable(code):
+    """Data classes should use @Immutable (or @Canonical) AST transforms."""
+    if re.search(r'@(Immutable|Canonical)\b', code):
+        return True, "Uses @Immutable/@Canonical"
+    if re.search(r'@(TupleConstructor|Builder|EqualsAndHashCode|ToString|Sortable)\b', code):
+        return True, "Uses Groovy AST transform(s)"
+    return False, "No AST transform — data class should use @Immutable/@Canonical"
+
+
+def check_bigdecimal_money(code):
+    """Monetary values use BigDecimal / the G suffix, never double/float."""
+    cleaned = _code_only(code)
+    if re.search(r'\b(double|Double|float|Float)\b', cleaned):
+        return False, "Uses double/float for a monetary value — use BigDecimal/G"
+    if re.search(r'\bBigDecimal\b', cleaned) or re.search(r'\b\d[\d_]*(?:\.\d+)?[gG]\b', cleaned):
+        return True, "Uses BigDecimal / G suffix for money"
+    return False, "No exact monetary type (BigDecimal/G) detected"
+
+
+def check_single_quotes_for_plain_strings(code):
+    """A double-quoted string with no interpolation should be single-quoted."""
+    c = re.sub(r'/\*.*?\*/', ' ', code, flags=re.DOTALL)
+    c = re.sub(r'//[^\n]*', ' ', c)
+    c = re.sub(r'""".*?"""', ' ', c, flags=re.DOTALL)
+    c = re.sub(r"'''.*?'''", ' ', c, flags=re.DOTALL)
+    for match in re.finditer(r'"((?:\\.|[^"\\])*)"', c):
+        content = match.group(1)
+        if '$' not in content and re.search(r'[A-Za-z0-9]', content):
+            return False, f'Double-quoted constant "{content}" at line {_line_of(c, match.start())} — use single quotes'
+    return True, "Plain strings use single quotes; double quotes only for interpolation"
+
+
+def check_groovy_truth(code):
+    """Prefer Groovy truth over verbose null/empty checks."""
+    cleaned = _code_only(code)
+    if re.search(r'\.isEmpty\s*\(\s*\)', cleaned):
+        return False, "Uses .isEmpty() — prefer Groovy truth (if (collection))"
+    if re.search(r'!=\s*null\s*&&', cleaned) or re.search(r'&&\s*[\w.]+\s*!=\s*null', cleaned):
+        return False, "Null check combined with && — prefer Groovy truth / safe navigation"
+    if re.search(r'==\s*null\s*\|\|', cleaned):
+        return False, "Null check combined with || — prefer Groovy truth"
+    return True, "Uses Groovy truth"
+
+
+def check_no_dot_equals(code):
+    """Use == for value equality, not .equals()/Objects.equals()."""
+    cleaned = _code_only(code)
+    if re.search(r'\.equals\s*\(', cleaned):
+        return False, "Uses .equals() — prefer == for null-safe value equality"
+    if re.search(r'\bObjects\.equals\b', cleaned):
+        return False, "Uses Objects.equals() — prefer =="
+    return True, "Uses == for equality"
+
+
+def check_uses_closures(code):
+    """Uses GDK closure methods rather than imperative loops."""
+    cleaned = _code_only(code)
+    if re.search(r'\b(collect|collectEntries|findAll|find|each|eachWithIndex|inject|groupBy|any|every|sum|max|min|sort|grep)\s*(?:\([^)]*\))?\s*\{', cleaned):
+        return True, "Uses GDK closure methods"
+    if re.search(r'\.\w+\s*\{', cleaned):
+        return True, "Uses closure-based methods"
+    return False, "No GDK closure methods detected"
+
+
+def check_safe_navigation(code):
+    """Uses the safe navigation operator ?. for nullable receivers."""
+    if '?.' in _code_only(code):
+        return True, "Uses safe navigation ?."
+    return False, "No safe navigation ?. found"
+
+
+def check_spaceship(code):
+    """Uses the spaceship operator <=> for comparisons."""
+    if '<=>' in _code_only(code):
+        return True, "Uses spaceship <=>"
+    return False, "No spaceship operator found"
+
+
+def check_spread(code):
+    """Uses the spread (*) or spread-dot (*.) operator."""
+    cleaned = _code_only(code)
+    if re.search(r'\*\.', cleaned):
+        return True, "Uses spread-dot *."
+    if re.search(r'\*:', cleaned):
+        return True, "Uses spread map *:"
+    if re.search(r'[\[(]\s*\*[A-Za-z_]', cleaned):
+        return True, "Uses spread *"
+    return False, "No spread operator found"
+
+
+def check_slashy_regex(code):
+    """Regex literals use slashy strings, not quoted strings."""
+    if re.search(r'(=~|==~)\s*"', code) or re.search(r'(?<![\w/])~\s*"', code) \
+            or re.search(r'Pattern\.compile\s*\(\s*"', code):
+        return False, "Regex uses a double-quoted pattern — use a slashy /pattern/"
+    if re.search(r'(=~|==~)\s*~?/', code) or '~/' in code:
+        return True, "Uses a slashy-string regex"
+    if re.search(r'=\s*~?/[^/\n]+/', code):
+        return True, "Uses a slashy-string regex"
+    return False, "No slashy-string regex detected"
+
+
+def check_identity_is(code):
+    """Reference identity uses the .is() operator, not =="""
+    if re.search(r'\.is\s*\(', _code_only(code)):
+        return True, "Uses .is() for reference identity"
+    return False, "No .is() identity check found"
+
+
+# ---------------------------------------------------------------------------
+# Spock checkers (Groovy test specs)
+# ---------------------------------------------------------------------------
+
+_SPOCK_LABELS = ('setup', 'given', 'when', 'then', 'expect', 'cleanup', 'where', 'and')
+_FEATURE_DECL = re.compile(r'(?:\bdef\b|\bvoid\b)\s+(?:[\'"].*?[\'"]|\w+)\s*\(')
+_LABEL_RE = re.compile(r'^\s*(' + '|'.join(_SPOCK_LABELS) + r')\s*:(.*)$')
+
+
+def _spock_blocks(code):
+    """Yield (block_type, line_text, line_no) for each line, tagged with the Spock
+    block it belongs to. block_type is None for the implicit setup region (before
+    any label). `and:` continues the current block; setup:/given: map to 'setup'.
+    A feature-method declaration resets to the implicit setup region."""
+    cleaned = _code_only(code)
+    current = None
+    for i, line in enumerate(cleaned.split('\n')):
+        if _FEATURE_DECL.search(line):
+            current = None
+            yield (current, line, i + 1)
+            continue
+        m = _LABEL_RE.match(line)
+        if m:
+            label = m.group(1)
+            if label in ('setup', 'given'):
+                current = 'setup'
+            elif label != 'and':
+                current = label
+            yield (current, m.group(2), i + 1)
+            continue
+        yield (current, line, i + 1)
+
+
+def _then_blocks(code):
+    """Return [(start_line, [line_text, ...]), ...] for each then: block."""
+    blocks = []
+    lines = None
+    start = 0
+    for block_type, text, lineno in _spock_blocks(code):
+        if block_type == 'then':
+            if lines is None:
+                lines = []
+                start = lineno
+            lines.append(text)
+        elif lines is not None:
+            blocks.append((start, lines))
+            lines = None
+    if lines is not None:
+        blocks.append((start, lines))
+    return blocks
+
+
+def check_extends_specification(code):
+    """A Spock spec extends spock.lang.Specification."""
+    if re.search(r'\bextends\s+Specification\b', code):
+        return True, "Spec extends Specification"
+    return False, "No 'extends Specification' found"
+
+
+def check_no_setup_given_label(code):
+    """setup:/given: labels are noise — unlabeled top-of-method statements are the
+    implicit setup block."""
+    cleaned = _code_only(code)
+    m = re.search(r'^\s*(setup|given)\s*:', cleaned, re.MULTILINE)
+    if m:
+        return False, f"'{m.group(1)}:' label at line {_line_of(cleaned, m.start())} — drop it; the implicit setup is unlabeled"
+    return True, "No setup:/given: label"
+
+
+def check_no_unroll(code):
+    """@Unroll is redundant in Spock 2.4."""
+    if re.search(r'@Unroll\b', code):
+        return False, "@Unroll present — redundant in Spock 2.4"
+    return True, "No @Unroll"
+
+
+def check_typed_mock_declaration(code):
+    """Mocks are declared 'Type x = Mock()', not 'def x = Mock(Type)'."""
+    cleaned = _code_only(code)
+    m = re.search(r'\bdef\s+\w+\s*=\s*(Mock|Stub|Spy)\s*\(', cleaned)
+    if m:
+        kind = m.group(1)
+        return False, f"'def x = {kind}(Type)' at line {_line_of(cleaned, m.start())} — declare as 'Type x = {kind}()'"
+    return True, "Mocks declared with the type on the left (Type x = Mock())"
+
+
+def check_no_nested_init_interactions(code):
+    """No interactions nested in a Mock()/Stub()/Spy() initializer closure —
+    interactions belong in then:."""
+    cleaned = _code_only(code)
+    m = re.search(r'\b(Mock|Stub|Spy)\s*\([^)]*\)\s*\{', cleaned)
+    if m:
+        return False, f"Nested interaction in a {m.group(1)}() initializer at line {_line_of(cleaned, m.start())} — declare it in then:"
+    return True, "No nested interactions in Mock()/Stub()/Spy() initializers"
+
+
+def check_strict_zero_interactions(code):
+    """Every then: block ends with '0 * _' to enforce strict interaction checking."""
+    blocks = _then_blocks(code)
+    if not blocks:
+        return None, "No then: blocks found"
+    zero_re = re.compile(r'\b0\s*\*\s*_')
+    for start, lines in blocks:
+        if not zero_re.search('\n'.join(lines)):
+            return False, f"then: block at line {start} is missing '0 * _'"
+    return True, "Every then: block ends with 0 * _"
+
+
+def check_no_bare_underscore_arg(code):
+    """No bare '_' as an argument matcher — validate the actual argument. ('0 * _'
+    and 'N * subject._' are fine; those are not argument lists.)"""
+    cleaned = _code_only(code)
+    for i, line in enumerate(cleaned.split('\n')):
+        if '>>' not in line and not re.search(r'\d+\s*\*', line):
+            continue
+        for argm in re.finditer(r'\.\w+\s*\(([^()]*)\)', line):
+            tokens = [a.strip() for a in argm.group(1).split(',')]
+            if any(t == '_' for t in tokens):
+                return False, f"Bare '_' argument matcher at line {i+1}: '{line.strip()}' — validate the actual argument"
+    return True, "No bare '_' argument matchers; arguments are validated"
+
+
+def check_value_assertions_not_in_then(code):
+    """Value assertions (==, !=, >=, <=, >, <) belong in expect:, not then:.
+    then: holds only interactions and thrown(...)."""
+    blocks = _then_blocks(code)
+    if not blocks:
+        return None, "No then: blocks found"
+    for start, lines in blocks:
+        depth = 0
+        for line in lines:
+            l = line.strip()
+            start_depth = depth
+            depth += l.count('{') - l.count('}') + l.count('(') - l.count(')')
+            # lines nested inside a closure / argument list belong to an interaction
+            if start_depth > 0:
+                continue
+            if not l or re.search(r'\d+\s*\*', l) or '>>' in l or 'thrown(' in l \
+                    or l.startswith('def ') or l.startswith('and'):
+                continue
+            scrubbed = l.replace('<=>', ' ').replace('>>', ' ').replace('<<', ' ').replace('->', ' ')
+            if re.search(r'==|!=|>=|<=|>|<', scrubbed):
+                return False, f"Value assertion in a then: block at line {start} ('{l}') — move it to an expect: block"
+    return True, "then: blocks hold only interactions/thrown; value assertions are in expect:"
+
+
+def check_uses_verifyall(code):
+    """Multiple grouped property assertions use verifyAll(...)."""
+    if re.search(r'\bverifyAll\s*\(', code):
+        return True, "Uses verifyAll for grouped assertions"
+    return False, "No verifyAll — group multi-property assertions with verifyAll(...)"
+
+
+def check_spy_subject_wildcard(code):
+    """When the subject is a Spy, interactions close with 'N * subject._' to
+    account for the method-under-test call."""
+    cleaned = _code_only(code)
+    if not re.search(r'\bSpy\s*\(', cleaned):
+        return None, "No Spy subject — rule N/A"
+    if re.search(r'[1-9]\d*\s*\*\s*\w+\s*\.\s*_', cleaned):
+        return True, "Spy subject closes interactions with 'N * subject._'"
+    return False, "Spy subject but no 'N * subject._' to account for the method-under-test call"
+
+
+def check_uses_spystatic(code):
+    """Static methods are enabled with a SpyStatic(TheClass) method call — not an
+    @SpyStatic annotation."""
+    cleaned = _code_only(code)
+    if re.search(r'@SpyStatic\b', cleaned):
+        return False, "Uses @SpyStatic annotation — SpyStatic is a method call, e.g. 'SpyStatic(TheClass)' at the top of the feature method"
+    if re.search(r'(?<!@)\bSpyStatic\s*\(', cleaned):
+        return True, "Uses SpyStatic(TheClass) method call for static mocking"
+    return False, "No SpyStatic(...) — enable static mocking with a 'SpyStatic(TheClass)' method call"
+
+
+def check_thrown_in_then(code):
+    """Thrown exceptions are captured with thrown(...) inside a then: block."""
+    blocks = _then_blocks(code)
+    for start, lines in blocks:
+        if any('thrown(' in l for l in lines):
+            return True, "Exception captured with thrown(...) in then:"
+    if 'thrown(' in _code_only(code):
+        return False, "thrown(...) is not inside a then: block"
+    return False, "No thrown(...) found"
+
+
+# ---------------------------------------------------------------------------
 # Registry: maps assertion IDs to checker functions
 # ---------------------------------------------------------------------------
 
@@ -763,6 +1212,10 @@ CHECKERS = {
     'no-setters': check_no_setters,
     'constructor-sets-all': check_constructor_sets_all,
     'constructor-injection': check_constructor_injection,
+    'no-private-methods': check_no_private_methods,
+    'protected-helpers': check_no_private_methods,
+    'visible-for-testing': check_visible_for_testing,
+    'instance-over-static': check_instance_over_static,
 
     # Java 8
     'streams-over-loops': check_streams_over_loops,
@@ -809,4 +1262,38 @@ CHECKERS = {
     'uses-slf4j-annotation': check_uses_slf4j_annotation,
     'uses-utility-class': check_uses_utility_class,
     'uses-standard-exception': check_uses_standard_exception,
+
+    # Groovy
+    'no-semicolons': check_no_semicolons,
+    'no-final-keyword': check_no_final_keyword,
+    'no-public-modifier': check_no_public_modifier,
+    'groovy-accessors': check_groovy_accessors,
+    'no-manual-getters-setters': check_no_manual_getters_setters_groovy,
+    'no-manual-equals-tostring': check_no_manual_equals_tostring_groovy,
+    'ast-immutable': check_ast_immutable,
+    'bigdecimal-money': check_bigdecimal_money,
+    'single-quotes-for-plain-strings': check_single_quotes_for_plain_strings,
+    'groovy-truth': check_groovy_truth,
+    'no-dot-equals': check_no_dot_equals,
+    'no-loops': check_streams_over_loops,
+    'uses-closures': check_uses_closures,
+    'safe-navigation': check_safe_navigation,
+    'spaceship-operator': check_spaceship,
+    'spread-operator': check_spread,
+    'slashy-regex': check_slashy_regex,
+    'identity-operator-is': check_identity_is,
+
+    # Spock
+    'extends-specification': check_extends_specification,
+    'no-setup-given-label': check_no_setup_given_label,
+    'no-unroll': check_no_unroll,
+    'typed-mock-declaration': check_typed_mock_declaration,
+    'no-nested-init-interactions': check_no_nested_init_interactions,
+    'strict-zero-interactions': check_strict_zero_interactions,
+    'no-bare-underscore-arg': check_no_bare_underscore_arg,
+    'value-assertions-in-expect': check_value_assertions_not_in_then,
+    'uses-verifyall': check_uses_verifyall,
+    'spy-subject-wildcard': check_spy_subject_wildcard,
+    'uses-spystatic': check_uses_spystatic,
+    'thrown-in-then': check_thrown_in_then,
 }

@@ -20,19 +20,20 @@ A SKILL.md at `plugins/conventions/skills/java-coding-conventions/SKILL.md` that
 Read `references/conventions.md` for the full set of conventions. Then write the output skill:
 
 1. **Output path:** `plugins/conventions/skills/java-coding-conventions/SKILL.md`
-2. **Frontmatter:** name `java-coding-conventions`, `user-invocable: false`, `model: haiku-4.5`
+2. **Frontmatter:** name `java-coding-conventions`, `user-invocable: false`. Do not set a `model:` field.
 3. **Scope:** Version-agnostic Java. No version-specific features or APIs. The skill should work equally well whether the target is Java 8 or Java 25.
 4. **Tone:** Explain *why* each convention matters, not just what to do. Use before/after examples. Imperative form.
 5. **Length:** Under 500 lines. Dense and practical — no filler.
-6. **Structure:** Group by theme: variables/parameters, immutability, small methods, exceptions, design, imports, naming.
+6. **Structure:** Group by theme: variables/parameters, immutability, small methods, visibility and testability, exceptions, design, imports, naming.
 
 Key things the skill must make very clear:
 - **Every** variable and parameter is `final` — this is the single most important convention
 - Direct constructor with all fields, not Builder pattern
 - Constructor injection — no field injection, no setter injection
 - No setters ever — immutable by default
-- Extract complex logic into named private methods
-- Most restrictive visibility
+- Tiny single-purpose methods — split anything you'd describe with "and"
+- Extract complex logic into named helper methods
+- Visibility chosen for testability: helper methods are `protected` + `@VisibleForTesting` (from `org.jetbrains.annotations`), not `private`; helpers are instance methods, not `static`, so they can be spied — except in pure utility classes. Constructors are exempt. Fields stay `private final`.
 
 ## Step 2: Validate with test cases
 
@@ -59,6 +60,9 @@ The script checks:
 - No setters
 - Constructor sets all fields
 - Constructor injection
+- No `private` methods — helpers are `protected` (constructors exempt)
+- `@VisibleForTesting` on protected helpers
+- Helpers are instance methods, not `static` (outside pure utility classes)
 
 ### Expected results
 

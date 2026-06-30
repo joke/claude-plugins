@@ -60,7 +60,7 @@ The constructor makes a defensive copy of mutable inputs and wraps them to preve
 
 ## Small Methods
 
-Each method does exactly one thing. If you need the word "and" to describe what a method does, split it. Method names describe *what* the method does, not *how*.
+Each method does exactly one thing and is only a few lines long. The test is linguistic: if you summarize a method and the summary needs the word "and" — "it validates the input *and* charges the card" — that's two methods. Split until each name is a single verb phrase with no "and". Method names describe *what* the method does, not *how*.
 
 ```java
 // too much — filtering AND counting AND formatting
@@ -76,9 +76,32 @@ public String getActiveCustomerReport(final List<Customer> customers) {
 }
 ```
 
-The calling method reads like a high-level description of the algorithm. Each helper method is small, testable, and reusable.
+The calling method reads like a high-level description of the algorithm. Long methods hide bugs in the middle; a method short enough to take in at a glance has nowhere to hide them — and it's trivial to name, test, and reuse.
 
-**Extract complex predicates and mapping logic** into named private methods rather than writing multi-line inline expressions. When the logic is non-trivial, giving it a name makes the calling code read like prose.
+**Extract complex predicates and mapping logic** into named helper methods rather than writing multi-line inline expressions. When the logic is non-trivial, giving it a name makes the calling code read like prose — and gives you a seam you can test directly.
+
+## Visibility and Testability
+
+Fields are always `private final` — that never changes. **Method** visibility, though, is chosen for *testability*, not just encapsulation.
+
+**Prefer `protected` over `private` for methods.** A `private` helper can only be exercised through the public method that calls it, so a failure deep in the chain surfaces as a failure of the public method and you reason backwards to find it. A `protected` method can be called directly from a unit test and — crucially — **stubbed or spied**, so you can test the method that calls it in isolation from its helpers. Mark every method you would have made `private` as `protected`, and annotate it `@VisibleForTesting` so readers understand the wider visibility is a test seam, not a contract for other callers:
+
+```java
+import org.jetbrains.annotations.VisibleForTesting;
+
+@VisibleForTesting
+protected BigDecimal calculateFee(final BigDecimal amount) {
+    return amount.multiply(feeRate);
+}
+```
+
+Two caveats:
+- **Don't mark these helpers `final`.** A `final` method can't be overridden, which is exactly how a spy stubs it — `final` slams the seam shut.
+- **Constructors stay as restrictive as the class needs.** You don't spy a constructor, so the protected rule doesn't apply to them.
+
+**Prefer instance methods over `static` for helpers.** A `static` method can't be overridden or spied, so a static helper welds itself into every method that calls it. Even when a helper touches no instance state, make it an instance method so tests can stub it. The one exception is a **pure utility class** — nothing but stateless static methods (`StringUtils`, `Money.format(...)`). There's no instance to spy and nothing to inject, so `static` is correct there. Outside that case, reach for an instance method.
+
+Keep the *public* API minimal regardless: `public` only what external callers need. Everything internal is `protected` (a test seam), not `public`.
 
 ## Exceptions
 
@@ -99,8 +122,7 @@ public class CustomerNotFoundException extends RuntimeException {
 - **Composition over inheritance.** Use inheritance only for true is-a relationships. Prefer delegating to collaborators over extending base classes.
 - **Interfaces only when needed** — when there are multiple implementations or you need a testing seam. Don't create an interface for every class.
 - **Constructor injection for dependencies.** No field injection, no setter injection. The constructor declares exactly what a class needs to work.
-- **Most restrictive visibility.** Start `private`, widen only when needed. Package-private before `protected`, `protected` before `public`.
-- **Prefer `static`** for methods that don't use instance state — it signals that the method is a pure function of its arguments.
+- **Method visibility and instance-vs-static** follow the Visibility and Testability rules above — `protected` over `private`, instance over `static`, so helpers stay spyable.
 
 ## Imports
 
